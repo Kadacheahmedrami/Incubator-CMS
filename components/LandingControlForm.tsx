@@ -53,17 +53,7 @@ export default function LandingControlForm({
         <div style={{ marginBottom: '1rem' }}>
           <label style={{ display: 'block', marginBottom: '0.5rem' }}>Landing Image:</label>
           <ImageUpload onUploadComplete={onImageUpload} />
-          {data.landingImage && (
-            <div style={{ marginTop: '10px' }}>
-              <Image
-                src={data.landingImage}
-                alt="Landing"
-                width={600} // adjust width as necessary
-                height={400} // adjust height as necessary
-                layout="responsive"
-              />
-            </div>
-          )}
+          
         </div>
 
         {/* Description */}

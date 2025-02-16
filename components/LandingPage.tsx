@@ -36,7 +36,7 @@ interface HeroSectionProps {
 const HeroSection: React.FC<HeroSectionProps> = ({ imageUrl, title, description }) => {
   return (
     <section className="relative h-screen flex items-center justify-center">
-      <Image src={imageUrl || "/placeholder.svg"} alt="Hero background" layout="fill" objectFit="cover" />
+      <Image src={imageUrl || "/placeholder.svg"} alt="Hero background" layout="fill" objectFit="cover"   unoptimized />
       <div className="absolute inset-0 bg-black opacity-50" />
       <div className="relative z-10 text-center text-white px-4">
         <motion.h1

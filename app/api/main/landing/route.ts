@@ -68,6 +68,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(landingPage);
   } catch (error: unknown) {
+      
     if (error instanceof Error) {
       return NextResponse.json(
         { error: error.message },
