@@ -3,6 +3,7 @@
 import React from 'react';
 import useLandingPageData from '@/hooks/useLandingPageData';
 import LandingControlForm from '@/components/LandingControlForm';
+import { LandingPage } from '@/components/LandingPage'; // Import your landing page component
 
 export default function LandingControlPage() {
   const { data, loading, saving, message, setData, saveLandingPage } = useLandingPageData();
@@ -28,13 +29,20 @@ export default function LandingControlPage() {
   }
 
   return (
-    <LandingControlForm
-      data={data}
-      onChange={handleChange}
-      onImageUpload={handleImageUpload}
-      onSubmit={handleSubmit}
-      saving={saving}
-      message={message}
-    />
+    <div className="flex flex-col md:flex-row min-h-screen">
+      <div className="w-full md:w-1/2 p-4 border-r border-gray-200">
+        <LandingControlForm
+          data={data}
+          onChange={handleChange}
+          onImageUpload={handleImageUpload}
+          onSubmit={handleSubmit}
+          saving={saving}
+          message={message}
+        />
+      </div>
+      <div className="w-full md:w-1/2">
+        <LandingPage data={data} />
+      </div>
+    </div>
   );
 }
