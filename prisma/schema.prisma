@@ -1,5 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -10,17 +9,127 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
-  password      String
-  name          String?
-  role          UserRole  @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+model LandingPage {
+  id                Int                  @id @default(autoincrement())
+  // One-to-one relation for the hero section.
+  heroId            Int @unique
+  hero              Hero                 @relation(fields: [heroId], references: [id])
+  
+  // One-to-many relations for list-based sections.
+  historyAndValues  HistoryAndValues[]
+  events            Event[]
+  partners          Partner[]
+  featuredStartups  FeaturedStartup[]
+  faqs              FAQ[]
+  programs          Program[]
+  news              News[]
+  visionAndMission  VisionAndMission[]
+  
+  // One-to-one relation for the footer.
+  footer            Footer?
 }
 
+model Hero {
+  id             Int          @id @default(autoincrement())
+  landingImage   String
+  title          String
+  description    String
 
+  // Optional back-relation (not required)
+  landingPage    LandingPage?
+}
+
+model HistoryAndValues {
+  id              Int           @id @default(autoincrement())
+  landingPageId   Int
+  landingPage     LandingPage   @relation(fields: [landingPageId], references: [id])
+  title           String
+  landingImage    String
+  description     String
+  order           Int
+}
+
+model Event {
+  id              Int           @id @default(autoincrement())
+  landingPageId   Int
+  landingPage     LandingPage   @relation(fields: [landingPageId], references: [id])
+  title           String
+  landingImage    String
+  description     String
+  order           Int
+}
+
+model Partner {
+  id              Int           @id @default(autoincrement())
+  landingPageId   Int
+  landingPage     LandingPage   @relation(fields: [landingPageId], references: [id])
+  name            String
+  logo            String
+  url             String?
+}
+
+model FeaturedStartup {
+  id              Int           @id @default(autoincrement())
+  landingPageId   Int
+  landingPage     LandingPage   @relation(fields: [landingPageId], references: [id])
+  startupId       Int
+  startup         Startup       @relation(fields: [startupId], references: [id])
+  order           Int
+}
+
+model FAQ {
+  id              Int           @id @default(autoincrement())
+  landingPageId   Int
+  landingPage     LandingPage   @relation(fields: [landingPageId], references: [id])
+  question        String
+  answer          String
+  order           Int
+}
+
+model Program {
+  id              Int           @id @default(autoincrement())
+  landingPageId   Int
+  landingPage     LandingPage   @relation(fields: [landingPageId], references: [id])
+  title           String
+  landingImage    String
+  description     String
+  order           Int
+}
+
+model News {
+  id              Int           @id @default(autoincrement())
+  landingPageId   Int
+  landingPage     LandingPage   @relation(fields: [landingPageId], references: [id])
+  title           String
+  landingImage    String
+  description     String
+  order           Int
+}
+
+model VisionAndMission {
+  id              Int           @id @default(autoincrement())
+  landingPageId   Int
+  landingPage     LandingPage   @relation(fields: [landingPageId], references: [id])
+  vision          String
+  mission         String
+  order           Int
+}
+
+model Footer {
+  id              Int           @id @default(autoincrement())
+  landingPageId   Int           @unique
+  landingPage     LandingPage   @relation(fields: [landingPageId], references: [id])
+  content         String       // HTML or markdown content
+}
+
+/// The Startup model remains mostly unchanged.
+/// Note: A startup can be featured in many landing pages.
+model Startup {
+  id              Int           @id @default(autoincrement())
+  name            String
+  description     String?
+  featuredIn      FeaturedStartup[]
+}
 
 enum UserRole {
   USER
@@ -28,16 +137,12 @@ enum UserRole {
   MENTOR
 }
 
-model LandingPage {
-  id           Int       @id @default(autoincrement())
-  title        String
-  landingImage String
-  description String
-}
-
-model Startup {
-  id            Int         @id @default(autoincrement())
-  name          String
-  description   String?
- 
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

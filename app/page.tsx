@@ -2,7 +2,7 @@ import { LandingPage } from '@/components/LandingPage';
 
 async function getLandingPage() {
   const res = await fetch('http://localhost:3000/api/main/landing', {
-    next: { revalidate: 3600 }, // Revalidate every hour
+    cache: 'no-store',
   });
 
   if (!res.ok) {
