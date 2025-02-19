@@ -1,4 +1,3 @@
-// hooks/useLandingPageData.ts
 import { useState, useEffect } from 'react';
 
 // Section interfaces
@@ -23,6 +22,7 @@ export interface PartnerItem {
   name: string;
   logo: string;
   url?: string;
+  order: number; // Added order field
 }
 
 export interface StartupItem {
@@ -73,13 +73,16 @@ export interface FooterData {
   content: string;
 }
 
-// The complete landing page data structure now includes a hero property.
+// Shared type for Hero – exported so other modules can use it.
+export interface HeroData {
+  landingImage: string;
+  title: string;
+  description: string;
+}
+
+// The complete landing page data structure now includes a hero.
 export interface LandingPageData {
-  hero: { 
-    landingImage: string; 
-    title: string; 
-    description: string; 
-  };
+  hero: HeroData;
   historyAndValues: HistoryAndValuesItem[];
   events: EventItem[];
   partners: PartnerItem[];
@@ -106,7 +109,7 @@ export default function useLandingPageData() {
     programs: [],
     news: [],
     visionAndMission: [],
-    footer: null,
+    footer: { content: "" },
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -132,7 +135,7 @@ export default function useLandingPageData() {
     setSaving(true);
     setMessage('');
     try {
-      const res = await fetch('/api/landing-page', {
+      const res = await fetch('/api/main/landing', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

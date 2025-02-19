@@ -12,13 +12,11 @@ export async function GET() {
         hero: true,
         historyAndValues: { orderBy: { order: 'asc' } },
         events: { orderBy: { order: 'asc' } },
-        partners: true,
+        partners: true, // Removed orderBy for partners
         featuredStartups: {
           include: { startup: true },
           orderBy: { order: 'asc' },
         },
-        // The generated client property for FAQ might be either 'fAQ' or 'faq'
-        // depending on your naming. Adjust accordingly.
         faqs: { orderBy: { order: 'asc' } },
         programs: { orderBy: { order: 'asc' } },
         news: { orderBy: { order: 'asc' } },
@@ -37,29 +35,23 @@ export async function GET() {
     return NextResponse.json(landingPage);
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
     // Expect a JSON body with keys for each section:
-    // hero, historyAndValues, events, partners, featuredStartups, fAQ, programs, news, visionAndMission, footer
+    // hero, historyAndValues, events, partners, featuredStartups, faqs, programs, news, visionAndMission, footer
     const {
       hero,
       historyAndValues,
       events,
       partners,
       featuredStartups,
-      fAQ,
+      faqs,
       programs,
       news,
       visionAndMission,
@@ -79,7 +71,6 @@ export async function PUT(request: NextRequest) {
             data: hero,
           });
         } else {
-          // If no hero exists, create one and update the landingPage record
           const newHero = await tx.hero.create({ data: hero });
           await tx.landingPage.update({
             where: { id: 1 },
@@ -89,13 +80,14 @@ export async function PUT(request: NextRequest) {
       }
 
       // --- Update List Sections ---
-      // For each list section, we delete existing records (for landingPage id 1)
-      // and recreate them with the new data (attaching landingPageId: 1).
       if (historyAndValues) {
         await tx.historyAndValues.deleteMany({ where: { landingPageId: 1 } });
         const dataToInsert = historyAndValues.map((item: any) => ({
-          ...item,
           landingPageId: 1,
+          title: item.title,
+          landingImage: item.landingImage,
+          description: item.description,
+          order: item.order,
         }));
         await tx.historyAndValues.createMany({ data: dataToInsert });
       }
@@ -103,8 +95,11 @@ export async function PUT(request: NextRequest) {
       if (events) {
         await tx.event.deleteMany({ where: { landingPageId: 1 } });
         const dataToInsert = events.map((item: any) => ({
-          ...item,
           landingPageId: 1,
+          title: item.title,
+          landingImage: item.landingImage,
+          description: item.description,
+          order: item.order,
         }));
         await tx.event.createMany({ data: dataToInsert });
       }
@@ -112,8 +107,11 @@ export async function PUT(request: NextRequest) {
       if (partners) {
         await tx.partner.deleteMany({ where: { landingPageId: 1 } });
         const dataToInsert = partners.map((item: any) => ({
-          ...item,
           landingPageId: 1,
+          name: item.name,
+          logo: item.logo,
+          url: item.url,
+          // Note: no 'order' field is included.
         }));
         await tx.partner.createMany({ data: dataToInsert });
       }
@@ -121,17 +119,20 @@ export async function PUT(request: NextRequest) {
       if (featuredStartups) {
         await tx.featuredStartup.deleteMany({ where: { landingPageId: 1 } });
         const dataToInsert = featuredStartups.map((item: any) => ({
-          ...item,
           landingPageId: 1,
+          startupId: item.startupId,
+          order: item.order,
         }));
         await tx.featuredStartup.createMany({ data: dataToInsert });
       }
 
-      if (fAQ) {
+      if (faqs) {
         await tx.fAQ.deleteMany({ where: { landingPageId: 1 } });
-        const dataToInsert = fAQ.map((item: any) => ({
-          ...item,
+        const dataToInsert = faqs.map((item: any) => ({
           landingPageId: 1,
+          question: item.question,
+          answer: item.answer,
+          order: item.order,
         }));
         await tx.fAQ.createMany({ data: dataToInsert });
       }
@@ -139,8 +140,11 @@ export async function PUT(request: NextRequest) {
       if (programs) {
         await tx.program.deleteMany({ where: { landingPageId: 1 } });
         const dataToInsert = programs.map((item: any) => ({
-          ...item,
           landingPageId: 1,
+          title: item.title,
+          landingImage: item.landingImage,
+          description: item.description,
+          order: item.order,
         }));
         await tx.program.createMany({ data: dataToInsert });
       }
@@ -148,8 +152,11 @@ export async function PUT(request: NextRequest) {
       if (news) {
         await tx.news.deleteMany({ where: { landingPageId: 1 } });
         const dataToInsert = news.map((item: any) => ({
-          ...item,
           landingPageId: 1,
+          title: item.title,
+          landingImage: item.landingImage,
+          description: item.description,
+          order: item.order,
         }));
         await tx.news.createMany({ data: dataToInsert });
       }
@@ -157,17 +164,17 @@ export async function PUT(request: NextRequest) {
       if (visionAndMission) {
         await tx.visionAndMission.deleteMany({ where: { landingPageId: 1 } });
         const dataToInsert = visionAndMission.map((item: any) => ({
-          ...item,
           landingPageId: 1,
+          vision: item.vision,
+          mission: item.mission,
+          order: item.order,
         }));
         await tx.visionAndMission.createMany({ data: dataToInsert });
       }
 
       if (footer) {
         await tx.footer.deleteMany({ where: { landingPageId: 1 } });
-        await tx.footer.create({
-          data: { ...footer, landingPageId: 1 },
-        });
+        await tx.footer.create({ data: { ...footer, landingPageId: 1 } });
       }
     });
 
@@ -175,14 +182,8 @@ export async function PUT(request: NextRequest) {
     return await GET();
   } catch (error: unknown) {
     if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
