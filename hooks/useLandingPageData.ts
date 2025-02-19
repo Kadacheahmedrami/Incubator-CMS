@@ -153,7 +153,9 @@ export default function useLandingPageData() {
       const res = await fetch('/api/main/landing');
       if (!res.ok) throw new Error('Failed to load landing page data');
       const json = await res.json();
+      console.log("hello",json)
       const transformed = transformLandingPageData(json);
+    
       setData(transformed);
     } catch (err: any) {
       console.error(err);
