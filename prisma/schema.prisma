@@ -8,13 +8,12 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
 model LandingPage {
   id                Int                  @id @default(autoincrement())
-  // One-to-one relation for the hero section.
-  heroId            Int @unique
-  hero              Hero                 @relation(fields: [heroId], references: [id])
   
+  // One-to-many relation: a landing page can have multiple hero sections.
+  heroSections      Hero[]
+
   // One-to-many relations for list-based sections.
   historyAndValues  HistoryAndValues[]
   events            Event[]
@@ -27,6 +26,7 @@ model LandingPage {
   
   // One-to-one relation for the footer.
   footer            Footer?
+  
 }
 
 model Hero {
@@ -35,8 +35,9 @@ model Hero {
   title          String
   description    String
 
-  // Optional back-relation (not required)
-  landingPage    LandingPage?
+  // Many-to-one relation: each hero section belongs to one landing page.
+  landingPageId  Int
+  landingPage    LandingPage @relation(fields: [landingPageId], references: [id])
 }
 
 model HistoryAndValues {

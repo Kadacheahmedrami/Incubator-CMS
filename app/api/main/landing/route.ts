@@ -5,34 +5,50 @@ import { prisma } from '@/prisma/prismaClient';
 
 export async function GET() {
   try {
-    // Fetch the single LandingPage record along with all its related sections.
-    const landingPage = await prisma.landingPage.findUnique({
-      where: { id: 1 }, // Assumes the one landing page has id = 1
-      include: {
-        hero: true,
-        historyAndValues: { orderBy: { order: 'asc' } },
-        events: { orderBy: { order: 'asc' } },
-        partners: true, // Removed orderBy for partners
-        featuredStartups: {
-          include: { startup: true },
-          orderBy: { order: 'asc' },
-        },
-        faqs: { orderBy: { order: 'asc' } },
-        programs: { orderBy: { order: 'asc' } },
-        news: { orderBy: { order: 'asc' } },
-        visionAndMission: { orderBy: { order: 'asc' } },
-        footer: true,
-      },
+    // Retrieve all sections from the database
+    const heroSections = await prisma.hero.findMany({
+      orderBy: { id: 'asc' }, // Adjust ordering as needed
     });
+    const historyAndValues = await prisma.historyAndValues.findMany({
+      orderBy: { order: 'asc' },
+    });
+    const events = await prisma.event.findMany({
+      orderBy: { order: 'asc' },
+    });
+    const partners = await prisma.partner.findMany();
+    const featuredStartups = await prisma.featuredStartup.findMany({
+      include: { startup: true },
+      orderBy: { order: 'asc' },
+    });
+    const faqs = await prisma.fAQ.findMany({
+      orderBy: { order: 'asc' },
+    });
+    const programs = await prisma.program.findMany({
+      orderBy: { order: 'asc' },
+    });
+    const news = await prisma.news.findMany({
+      orderBy: { order: 'asc' },
+    });
+    const visionAndMission = await prisma.visionAndMission.findMany({
+      orderBy: { order: 'asc' },
+    });
+    const footer = await prisma.footer.findFirst();
 
-    if (!landingPage) {
-      return NextResponse.json(
-        { error: 'Landing page not found' },
-        { status: 404 }
-      );
-    }
+    // Aggregate the landing page data
+    const landingPageData = {
+      heroSections,
+      historyAndValues,
+      events,
+      partners,
+      featuredStartups,
+      faqs,
+      programs,
+      news,
+      visionAndMission,
+      footer,
+    };
 
-    return NextResponse.json(landingPage);
+    return NextResponse.json(landingPageData);
   } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -44,9 +60,9 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   try {
     // Expect a JSON body with keys for each section:
-    // hero, historyAndValues, events, partners, featuredStartups, faqs, programs, news, visionAndMission, footer
+    // heroSections, historyAndValues, events, partners, featuredStartups, faqs, programs, news, visionAndMission, footer
     const {
-      hero,
+      heroSections,
       historyAndValues,
       events,
       partners,
@@ -58,127 +74,60 @@ export async function PUT(request: NextRequest) {
       footer,
     } = await request.json();
 
+    // Use a transaction to update all sections atomically
     await prisma.$transaction(async (tx) => {
-      // --- Update Hero (one-to-one) ---
-      if (hero) {
-        const existingLandingPage = await tx.landingPage.findUnique({
-          where: { id: 1 },
-          include: { hero: true },
-        });
-        if (existingLandingPage?.hero) {
-          await tx.hero.update({
-            where: { id: existingLandingPage.hero.id },
-            data: hero,
-          });
-        } else {
-          const newHero = await tx.hero.create({ data: hero });
-          await tx.landingPage.update({
-            where: { id: 1 },
-            data: { heroId: newHero.id },
-          });
-        }
+      if (heroSections) {
+        await tx.hero.deleteMany();
+        await tx.hero.createMany({ data: heroSections });
       }
 
-      // --- Update List Sections ---
       if (historyAndValues) {
-        await tx.historyAndValues.deleteMany({ where: { landingPageId: 1 } });
-        const dataToInsert = historyAndValues.map((item: any) => ({
-          landingPageId: 1,
-          title: item.title,
-          landingImage: item.landingImage,
-          description: item.description,
-          order: item.order,
-        }));
-        await tx.historyAndValues.createMany({ data: dataToInsert });
+        await tx.historyAndValues.deleteMany();
+        await tx.historyAndValues.createMany({ data: historyAndValues });
       }
 
       if (events) {
-        await tx.event.deleteMany({ where: { landingPageId: 1 } });
-        const dataToInsert = events.map((item: any) => ({
-          landingPageId: 1,
-          title: item.title,
-          landingImage: item.landingImage,
-          description: item.description,
-          order: item.order,
-        }));
-        await tx.event.createMany({ data: dataToInsert });
+        await tx.event.deleteMany();
+        await tx.event.createMany({ data: events });
       }
 
       if (partners) {
-        await tx.partner.deleteMany({ where: { landingPageId: 1 } });
-        const dataToInsert = partners.map((item: any) => ({
-          landingPageId: 1,
-          name: item.name,
-          logo: item.logo,
-          url: item.url,
-          // Note: no 'order' field is included.
-        }));
-        await tx.partner.createMany({ data: dataToInsert });
+        await tx.partner.deleteMany();
+        await tx.partner.createMany({ data: partners });
       }
 
       if (featuredStartups) {
-        await tx.featuredStartup.deleteMany({ where: { landingPageId: 1 } });
-        const dataToInsert = featuredStartups.map((item: any) => ({
-          landingPageId: 1,
-          startupId: item.startupId,
-          order: item.order,
-        }));
-        await tx.featuredStartup.createMany({ data: dataToInsert });
+        await tx.featuredStartup.deleteMany();
+        await tx.featuredStartup.createMany({ data: featuredStartups });
       }
 
       if (faqs) {
-        await tx.fAQ.deleteMany({ where: { landingPageId: 1 } });
-        const dataToInsert = faqs.map((item: any) => ({
-          landingPageId: 1,
-          question: item.question,
-          answer: item.answer,
-          order: item.order,
-        }));
-        await tx.fAQ.createMany({ data: dataToInsert });
+        await tx.fAQ.deleteMany();
+        await tx.fAQ.createMany({ data: faqs });
       }
 
       if (programs) {
-        await tx.program.deleteMany({ where: { landingPageId: 1 } });
-        const dataToInsert = programs.map((item: any) => ({
-          landingPageId: 1,
-          title: item.title,
-          landingImage: item.landingImage,
-          description: item.description,
-          order: item.order,
-        }));
-        await tx.program.createMany({ data: dataToInsert });
+        await tx.program.deleteMany();
+        await tx.program.createMany({ data: programs });
       }
 
       if (news) {
-        await tx.news.deleteMany({ where: { landingPageId: 1 } });
-        const dataToInsert = news.map((item: any) => ({
-          landingPageId: 1,
-          title: item.title,
-          landingImage: item.landingImage,
-          description: item.description,
-          order: item.order,
-        }));
-        await tx.news.createMany({ data: dataToInsert });
+        await tx.news.deleteMany();
+        await tx.news.createMany({ data: news });
       }
 
       if (visionAndMission) {
-        await tx.visionAndMission.deleteMany({ where: { landingPageId: 1 } });
-        const dataToInsert = visionAndMission.map((item: any) => ({
-          landingPageId: 1,
-          vision: item.vision,
-          mission: item.mission,
-          order: item.order,
-        }));
-        await tx.visionAndMission.createMany({ data: dataToInsert });
+        await tx.visionAndMission.deleteMany();
+        await tx.visionAndMission.createMany({ data: visionAndMission });
       }
 
       if (footer) {
-        await tx.footer.deleteMany({ where: { landingPageId: 1 } });
-        await tx.footer.create({ data: { ...footer, landingPageId: 1 } });
+        await tx.footer.deleteMany();
+        await tx.footer.create({ data: footer });
       }
     });
 
-    // Return the updated landing page data
+    // Return the updated landing page data after the update
     return await GET();
   } catch (error: unknown) {
     if (error instanceof Error) {

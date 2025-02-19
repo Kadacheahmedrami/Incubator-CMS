@@ -1,105 +1,107 @@
+// /hooks/useLandingPageData.ts
 import { useState, useEffect } from 'react';
 
-// Section interfaces
-export interface HistoryAndValuesItem {
+export interface HeroData {
+  id?: number;
+  landingImage: string;
+  title: string;
+  description: string;
+  landingPageId: number;
+}
+
+export interface HistoryAndValuesData {
   id?: number;
   title: string;
   landingImage: string;
   description: string;
   order: number;
+  landingPageId: number;
 }
 
-export interface EventItem {
+export interface EventData {
   id?: number;
   title: string;
   landingImage: string;
   description: string;
   order: number;
+  landingPageId: number;
 }
 
-export interface PartnerItem {
+export interface PartnerData {
   id?: number;
   name: string;
   logo: string;
   url?: string;
-  order: number; // Added order field
+  landingPageId: number;
 }
 
-export interface StartupItem {
-  id: number;
-  name: string;
-  description?: string;
-}
-
-export interface FeaturedStartupItem {
+export interface FeaturedStartupData {
   id?: number;
   startupId: number;
   order: number;
-  startup?: StartupItem;
+  landingPageId: number;
 }
 
-export interface FAQItem {
+export interface FAQData {
   id?: number;
   question: string;
   answer: string;
   order: number;
+  landingPageId: number;
 }
 
-export interface ProgramItem {
+export interface ProgramData {
   id?: number;
   title: string;
   landingImage: string;
   description: string;
   order: number;
+  landingPageId: number;
 }
 
-export interface NewsItem {
+export interface NewsData {
   id?: number;
   title: string;
   landingImage: string;
   description: string;
   order: number;
+  landingPageId: number;
 }
 
-export interface VisionAndMissionItem {
+export interface VisionAndMissionData {
   id?: number;
   vision: string;
   mission: string;
   order: number;
+  landingPageId: number;
 }
 
 export interface FooterData {
   id?: number;
   content: string;
+  landingPageId: number;
 }
 
-// Shared type for Hero – exported so other modules can use it.
-export interface HeroData {
-  landingImage: string;
-  title: string;
-  description: string;
-}
-
-// The complete landing page data structure now includes a hero.
 export interface LandingPageData {
   hero: HeroData;
-  historyAndValues: HistoryAndValuesItem[];
-  events: EventItem[];
-  partners: PartnerItem[];
-  featuredStartups: FeaturedStartupItem[];
-  faqs: FAQItem[];
-  programs: ProgramItem[];
-  news: NewsItem[];
-  visionAndMission: VisionAndMissionItem[];
-  footer: FooterData | null;
+  historyAndValues: HistoryAndValuesData[];
+  events: EventData[];
+  partners: PartnerData[];
+  featuredStartups: FeaturedStartupData[];
+  faqs: FAQData[];
+  programs: ProgramData[];
+  news: NewsData[];
+  visionAndMission: VisionAndMissionData[];
+  footer: FooterData;
 }
 
-export default function useLandingPageData() {
-  const [data, setData] = useState<LandingPageData>({
+function initialLandingPageData(): LandingPageData {
+  return {
     hero: {
-      landingImage: '/placeholder.svg',
-      title: 'Innovate. Incubate. Accelerate.',
-      description: 'Empowering the next generation of startups.',
+      landingImage: '',
+      title: '',
+      description: '',
+      landingPageId: 1,
     },
     historyAndValues: [],
     events: [],
@@ -109,55 +111,61 @@ export default function useLandingPageData() {
     programs: [],
     news: [],
     visionAndMission: [],
-    footer: { content: "" },
-  });
+    footer: {
+      content: '',
+      landingPageId: 1,
+    },
+  };
+}
+
+/**
+ * Transforms the API response (which uses keys like "heroSections")
+ * into our expected LandingPageData shape.
+ */
+function transformLandingPageData(apiData: any): LandingPageData {
+  const defaults = initialLandingPageData();
+  return {
+    // Use the first hero section as our single hero object.
+    hero:
+      apiData.heroSections && apiData.heroSections.length > 0
+        ? apiData.heroSections[0]
+        : defaults.hero,
+    historyAndValues: apiData.historyAndValues || defaults.historyAndValues,
+    events: apiData.events || defaults.events,
+    partners: apiData.partners || defaults.partners,
+    featuredStartups: apiData.featuredStartups || defaults.featuredStartups,
+    faqs: apiData.faqs || defaults.faqs,
+    programs: apiData.programs || defaults.programs,
+    news: apiData.news || defaults.news,
+    visionAndMission: apiData.visionAndMission || defaults.visionAndMission,
+    footer: apiData.footer || defaults.footer,
+  };
+}
+
+export default function useLandingPageData() {
+  const [data, setData] = useState<LandingPageData>(initialLandingPageData());
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
-  const fetchLandingPage = async () => {
+  async function refreshData() {
     try {
       const res = await fetch('/api/main/landing');
-      if (!res.ok) {
-        setMessage('Failed to load landing page content.');
-        return;
-      }
-      const fetchedData: LandingPageData = await res.json();
-      setData(fetchedData);
-    } catch (error) {
-      setMessage('An error occurred while fetching data.');
+      if (!res.ok) throw new Error('Failed to load landing page data');
+      const json = await res.json();
+      const transformed = transformLandingPageData(json);
+      setData(transformed);
+    } catch (err: any) {
+      console.error(err);
+      setMessage(err.message || 'Error loading data');
     } finally {
       setLoading(false);
     }
-  };
-
-  const saveLandingPage = async (newData: LandingPageData) => {
-    setSaving(true);
-    setMessage('');
-    try {
-      const res = await fetch('/api/main/landing', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newData),
-      });
-      const result = await res.json();
-      if (!res.ok) {
-        setMessage(result.error || 'Error saving data');
-      } else {
-        setMessage('Landing page updated successfully.');
-        setData(newData);
-      }
-    } catch (error: any) {
-      setMessage(error.message || 'An error occurred');
-    }
-    setSaving(false);
-  };
+  }
 
   useEffect(() => {
-    fetchLandingPage();
+    refreshData();
   }, []);
 
-  return { data, loading, saving, message, setData, saveLandingPage };
+  return { data, loading, saving, message, setData, refreshData };
 }
