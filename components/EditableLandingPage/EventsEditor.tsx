@@ -1,4 +1,3 @@
-// /app/components/EventsEditor.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -123,6 +122,13 @@ const EventsEditor: React.FC<EventsEditorProps> = ({ items, refresh }) => {
               className="w-full p-2 border rounded"
             />
           </div>
+          {/* Image Uploader Section */}
+          <div className="mt-2">
+            <EventImageUploader
+              onUpload={(url) => handleChange(index, 'landingImage', url)}
+              publicId={item.id ? `event-${item.id}` : `event-temp-${index}`}
+            />
+          </div>
           <div>
             <label className="block font-medium">Order</label>
             <input
@@ -151,3 +157,111 @@ const EventsEditor: React.FC<EventsEditorProps> = ({ items, refresh }) => {
 };
 
 export default EventsEditor;
+
+/* --------------------------------------------------------------------------
+   EVENT IMAGE UPLOADER COMPONENT
+   --------------------------------------------------------------------------
+   This component provides a drag & drop area, a file input, and a URL input.
+   It uses your /api/main/landing/events/upload endpoint to update the image.
+   A publicId prop is provided so that each event always uploads to the same Cloudinary public ID,
+   ensuring that the previous image is overridden.
+-------------------------------------------------------------------------- */
+interface EventImageUploaderProps {
+  onUpload: (url: string) => void;
+  publicId?: string;
+}
+
+const EventImageUploader: React.FC<EventImageUploaderProps> = ({ onUpload, publicId }) => {
+  const [dragActive, setDragActive] = useState(false);
+  const [urlInput, setUrlInput] = useState('');
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragActive(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      uploadFile(file);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      uploadFile(file);
+    }
+  };
+
+  const uploadFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64data = reader.result;
+      if (typeof base64data === 'string') {
+        try {
+          const res = await fetch('/api/main/landing/events/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64data, publicId }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            onUpload(data.url);
+          } else {
+            const errorData = await res.json();
+            alert(errorData.error || 'Failed to upload image');
+          }
+        } catch (err: any) {
+          alert(err.message);
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUrlSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (urlInput.trim()) {
+      onUpload(urlInput.trim());
+      setUrlInput('');
+    }
+  };
+
+  return (
+    <div>
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`p-4 border-2 border-dashed rounded mb-2 ${
+          dragActive ? 'border-blue-500' : 'border-gray-300'
+        }`}
+      >
+        <p className="text-center">Drag and drop an image file here</p>
+      </div>
+      <div className="mb-2">
+        <input type="file" accept="image/*" onChange={handleFileChange} />
+      </div>
+      <form onSubmit={handleUrlSubmit} className="flex items-center space-x-2">
+        <input
+          type="text"
+          placeholder="Or enter image URL"
+          value={urlInput}
+          onChange={(e) => setUrlInput(e.target.value)}
+          className="border p-2 rounded flex-grow"
+        />
+        <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded">
+          Set Image
+        </button>
+      </form>
+    </div>
+  );
+};

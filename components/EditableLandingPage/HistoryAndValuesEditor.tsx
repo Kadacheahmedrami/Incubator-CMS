@@ -1,4 +1,3 @@
-// /app/components/HistoryAndValuesEditor.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -9,12 +8,22 @@ interface HistoryAndValuesEditorProps {
   refresh: () => void;
 }
 
+const defaultItem: HistoryAndValuesData = {
+  title: '',
+  landingImage: '',
+  description: '',
+  order: 1,
+  landingPageId: 1,
+};
+
 const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, refresh }) => {
-  const [localItems, setLocalItems] = useState<HistoryAndValuesData[]>(items);
+  const [localItems, setLocalItems] = useState<HistoryAndValuesData[]>(
+    items && items.length > 0 ? items : [defaultItem]
+  );
 
   // Sync local state when items prop changes.
   useEffect(() => {
-    setLocalItems(items);
+    setLocalItems(items && items.length > 0 ? items : [defaultItem]);
   }, [items]);
 
   const handleChange = (index: number, field: string, value: string | number) => {
@@ -23,18 +32,27 @@ const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, 
     setLocalItems(newItems);
   };
 
-  // Save an existing item (using PUT).
   const saveItem = async (item: HistoryAndValuesData) => {
-    if (!item.id) return;
     try {
-      const res = await fetch(`/api/main/landing/history-values/${item.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item),
-      });
+      let res;
+      if (item.id) {
+        // Update an existing item.
+        res = await fetch(`/api/main/landing/history-values/${item.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item),
+        });
+      } else {
+        // Create a new item.
+        res = await fetch(`/api/main/landing/history-values`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item),
+        });
+      }
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to update item');
+        throw new Error(errorData.error || 'Failed to save item');
       }
       refresh();
     } catch (err: any) {
@@ -42,9 +60,12 @@ const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, 
     }
   };
 
-  // Delete an item.
-  const deleteItem = async (item: HistoryAndValuesData) => {
-    if (!item.id) return;
+  const deleteItem = async (item: HistoryAndValuesData, index: number) => {
+    // For unsaved items, simply remove them from local state.
+    if (!item.id) {
+      setLocalItems(localItems.filter((_, i) => i !== index));
+      return;
+    }
     try {
       const res = await fetch(`/api/main/landing/history-values/${item.id}`, {
         method: 'DELETE',
@@ -59,15 +80,15 @@ const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, 
     }
   };
 
-  // Add a new item (using POST).
   const addNewItem = async () => {
     const newItem: HistoryAndValuesData = {
       title: '',
       landingImage: '',
       description: '',
       order: localItems.length + 1,
-      landingPageId: items.length > 0 ? items[0].landingPageId : 1,
+      landingPageId: items && items.length > 0 ? items[0].landingPageId : 1,
     };
+
     try {
       const res = await fetch(`/api/main/landing/history-values`, {
         method: 'POST',
@@ -88,14 +109,12 @@ const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, 
     <section className="mb-8">
       <h2 className="text-2xl font-bold mb-4">History & Values</h2>
       {localItems.map((item, index) => (
-        <div key={item.id || index} className="border p-4 rounded mb-4">
+        <div key={item.id ?? index} className="border p-4 rounded mb-4">
           <div className="flex justify-between items-center">
             <span className="font-medium">Item {index + 1}</span>
-            {item.id && (
-              <button onClick={() => deleteItem(item)} className="text-red-500">
-                Delete
-              </button>
-            )}
+            <button onClick={() => deleteItem(item, index)} className="text-red-500">
+              Delete
+            </button>
           </div>
           <div>
             <label className="block font-medium">Title</label>
@@ -127,6 +146,13 @@ const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, 
               className="w-full p-2 border rounded"
             />
           </div>
+          {/* Image Uploader Section */}
+          <div className="mt-2">
+            <HistoryImageUploader 
+              onUpload={(url) => handleChange(index, 'landingImage', url)}
+              publicId={item.id ? `history-${item.id}` : `history-temp-${index}`}
+            />
+          </div>
           <div>
             <label className="block font-medium">Order</label>
             <input
@@ -137,16 +163,12 @@ const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, 
               className="w-full p-2 border rounded"
             />
           </div>
-          {item.id ? (
-            <button
-              onClick={() => saveItem(item)}
-              className="mt-2 bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded"
-            >
-              Save Changes
-            </button>
-          ) : (
-            <span className="text-gray-500">New item – click "Add New" to save.</span>
-          )}
+          <button
+            onClick={() => saveItem(item)}
+            className="mt-2 bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded"
+          >
+            Save Changes
+          </button>
         </div>
       ))}
       <button onClick={addNewItem} className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded">
@@ -157,3 +179,109 @@ const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, 
 };
 
 export default HistoryAndValuesEditor;
+
+/* --------------------------------------------------------------------------
+   HISTORY IMAGE UPLOADER COMPONENT
+   --------------------------------------------------------------------------
+   This component provides a drag & drop area, a file input, and a URL input.
+   It uses your /api/main/landing/history-values/upload endpoint to update the image.
+   A publicId prop is provided so that each item always uploads to the same Cloudinary public ID,
+   ensuring that the previous image is overridden.
+-------------------------------------------------------------------------- */
+interface HistoryImageUploaderProps {
+  onUpload: (url: string) => void;
+  publicId?: string;
+}
+
+const HistoryImageUploader: React.FC<HistoryImageUploaderProps> = ({ onUpload, publicId }) => {
+  const [dragActive, setDragActive] = useState(false);
+  const [urlInput, setUrlInput] = useState('');
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragActive(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      uploadFile(file);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      uploadFile(file);
+    }
+  };
+
+  const uploadFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64data = reader.result;
+      if (typeof base64data === 'string') {
+        try {
+          const res = await fetch('/api/main/landing/history-values/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64data, publicId }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            onUpload(data.url);
+          } else {
+            const errorData = await res.json();
+            alert(errorData.error || 'Failed to upload image');
+          }
+        } catch (err: any) {
+          alert(err.message);
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUrlSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (urlInput.trim()) {
+      onUpload(urlInput.trim());
+      setUrlInput('');
+    }
+  };
+
+  return (
+    <div>
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`p-4 border-2 border-dashed rounded mb-2 ${dragActive ? 'border-blue-500' : 'border-gray-300'}`}
+      >
+        <p className="text-center">Drag and drop an image file here</p>
+      </div>
+      <div className="mb-2">
+        <input type="file" accept="image/*" onChange={handleFileChange} />
+      </div>
+      <form onSubmit={handleUrlSubmit} className="flex items-center space-x-2">
+        <input
+          type="text"
+          placeholder="Or enter image URL"
+          value={urlInput}
+          onChange={(e) => setUrlInput(e.target.value)}
+          className="border p-2 rounded flex-grow"
+        />
+        <button type="submit" className="bg-blue-500 text-white py-2 px-4 rounded">
+          Set Image
+        </button>
+      </form>
+    </div>
+  );
+};
