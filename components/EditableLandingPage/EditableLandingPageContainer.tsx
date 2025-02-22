@@ -1,4 +1,3 @@
-// /app/components/EditableLandingPageContainer.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -30,7 +29,7 @@ const EditableLandingPageContainer: React.FC = () => {
           {globalMessage}
         </div>
       )}
-      <HeroEditor hero={data.hero} refresh={refreshData} />
+      <HeroEditor heroSections={data.heroSections} refresh={refreshData} />
       <HistoryAndValuesEditor items={data.historyAndValues} refresh={refreshData} />
       <EventsEditor items={data.events} refresh={refreshData} />
       <PartnersEditor items={data.partners} refresh={refreshData} />

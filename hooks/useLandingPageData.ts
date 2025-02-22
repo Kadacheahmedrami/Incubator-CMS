@@ -1,4 +1,3 @@
-// /hooks/useLandingPageData.ts
 import { useState, useEffect } from 'react';
 
 export interface HeroData {
@@ -83,7 +82,7 @@ export interface FooterData {
 }
 
 export interface LandingPageData {
-  hero: HeroData;
+  heroSections: HeroData[];
   historyAndValues: HistoryAndValuesData[];
   events: EventData[];
   partners: PartnerData[];
@@ -97,12 +96,7 @@ export interface LandingPageData {
 
 function initialLandingPageData(): LandingPageData {
   return {
-    hero: {
-      landingImage: '',
-      title: '',
-      description: '',
-      landingPageId: 1,
-    },
+    heroSections: [],
     historyAndValues: [],
     events: [],
     partners: [],
@@ -119,17 +113,12 @@ function initialLandingPageData(): LandingPageData {
 }
 
 /**
- * Transforms the API response (which uses keys like "heroSections")
- * into our expected LandingPageData shape.
+ * Transforms the API response into our expected LandingPageData shape.
  */
 function transformLandingPageData(apiData: any): LandingPageData {
   const defaults = initialLandingPageData();
   return {
-    // Use the first hero section as our single hero object.
-    hero:
-      apiData.heroSections && apiData.heroSections.length > 0
-        ? apiData.heroSections[0]
-        : defaults.hero,
+    heroSections: apiData.heroSections || defaults.heroSections,
     historyAndValues: apiData.historyAndValues || defaults.historyAndValues,
     events: apiData.events || defaults.events,
     partners: apiData.partners || defaults.partners,
@@ -153,9 +142,8 @@ export default function useLandingPageData() {
       const res = await fetch('/api/main/landing');
       if (!res.ok) throw new Error('Failed to load landing page data');
       const json = await res.json();
-      console.log("hello",json)
+      console.log("data == ", json);
       const transformed = transformLandingPageData(json);
-    
       setData(transformed);
     } catch (err: any) {
       console.error(err);
