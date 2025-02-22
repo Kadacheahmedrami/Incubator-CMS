@@ -8,6 +8,7 @@ export async function GET() {
     });
     return NextResponse.json(footers);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to fetch footer sections' },
       { status: 500 }
@@ -26,6 +27,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(newFooter, { status: 201 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to create footer section' },
       { status: 500 }

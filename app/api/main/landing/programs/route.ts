@@ -8,6 +8,7 @@ export async function GET() {
     });
     return NextResponse.json(programs);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to fetch programs' },
       { status: 500 }
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(newProgram, { status: 201 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to create program' },
       { status: 500 }

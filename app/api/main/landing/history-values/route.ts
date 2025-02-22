@@ -8,6 +8,7 @@ export async function GET() {
     });
     return NextResponse.json(historyValues);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to fetch history and values' },
       { status: 500 }
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(newHistoryValue, { status: 201 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to create history and values section' },
       { status: 500 }

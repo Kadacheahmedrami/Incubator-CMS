@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+
 import useLandingPageData from '@/hooks/useLandingPageData';
 
 import HeroEditor from './HeroEditor';
@@ -17,8 +17,8 @@ import FooterEditor from './FooterEditor';
 
 const EditableLandingPageContainer: React.FC = () => {
   const { data, loading, message, refreshData } = useLandingPageData();
-  const [globalMessage, setGlobalMessage] = useState('');
-
+  const [globalMessage, ] = useState('');
+  
   if (loading) return <div className="p-8 text-center">Loading...</div>;
 
   return (

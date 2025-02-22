@@ -8,6 +8,7 @@ export async function GET() {
     });
     return NextResponse.json(heroSections);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to fetch hero sections' },
       { status: 500 }
@@ -28,6 +29,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(newHero, { status: 201 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to create hero section' },
       { status: 500 }

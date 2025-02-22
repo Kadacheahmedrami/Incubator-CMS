@@ -55,8 +55,8 @@ const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, 
         throw new Error(errorData.error || 'Failed to save item');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -75,8 +75,8 @@ const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, 
         throw new Error(errorData.error || 'Failed to delete item');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -100,8 +100,8 @@ const HistoryAndValuesEditor: React.FC<HistoryAndValuesEditorProps> = ({ items, 
         throw new Error(errorData.error || 'Failed to add item');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -241,8 +241,8 @@ const HistoryImageUploader: React.FC<HistoryImageUploaderProps> = ({ onUpload, p
             const errorData = await res.json();
             alert(errorData.error || 'Failed to upload image');
           }
-        } catch (err: any) {
-          alert(err.message);
+        } catch (err: unknown) {
+          alert(err);
         }
       }
     };

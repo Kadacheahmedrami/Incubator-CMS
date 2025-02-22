@@ -34,8 +34,8 @@ const EventsEditor: React.FC<EventsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to update event');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -50,8 +50,8 @@ const EventsEditor: React.FC<EventsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to delete event');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -74,8 +74,8 @@ const EventsEditor: React.FC<EventsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to add event');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -219,8 +219,8 @@ const EventImageUploader: React.FC<EventImageUploaderProps> = ({ onUpload, publi
             const errorData = await res.json();
             alert(errorData.error || 'Failed to upload image');
           }
-        } catch (err: any) {
-          alert(err.message);
+        } catch (err: unknown) {
+          alert(err);
         }
       }
     };

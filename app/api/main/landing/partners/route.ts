@@ -9,6 +9,7 @@ export async function GET() {
     });
     return NextResponse.json(partners);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to fetch partners' },
       { status: 500 }
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(newPartner, { status: 201 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to create partner' },
       { status: 500 }

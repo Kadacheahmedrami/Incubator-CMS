@@ -34,8 +34,8 @@ const ProgramsEditor: React.FC<ProgramsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to update program');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -50,8 +50,8 @@ const ProgramsEditor: React.FC<ProgramsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to delete program');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -74,8 +74,8 @@ const ProgramsEditor: React.FC<ProgramsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to add program');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -219,8 +219,8 @@ const ProgramImageUploader: React.FC<ProgramImageUploaderProps> = ({ onUpload, p
             const errorData = await res.json();
             alert(errorData.error || 'Failed to upload image');
           }
-        } catch (err: any) {
-          alert(err.message);
+        } catch (err: unknown) {
+          alert(err);
         }
       }
     };

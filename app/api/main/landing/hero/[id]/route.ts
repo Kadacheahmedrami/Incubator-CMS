@@ -9,9 +9,9 @@ function parseHeroId(id: string): number | null {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const heroId = parseHeroId(params.id);
+  const heroId = parseHeroId((await params).id);
   if (heroId === null) {
     return NextResponse.json({ error: 'Invalid hero id' }, { status: 400 });
   }
@@ -35,9 +35,9 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const heroId = parseHeroId(params.id);
+  const heroId = parseHeroId((await params).id);
   if (heroId === null) {
     return NextResponse.json({ error: 'Invalid hero id' }, { status: 400 });
   }
@@ -79,9 +79,9 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const heroId = parseHeroId(params.id);
+  const heroId = parseHeroId((await params).id);
   if (heroId === null) {
     return NextResponse.json({ error: 'Invalid hero id' }, { status: 400 });
   }

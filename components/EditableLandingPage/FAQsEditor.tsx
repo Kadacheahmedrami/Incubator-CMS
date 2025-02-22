@@ -35,8 +35,8 @@ const FAQsEditor: React.FC<FAQsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to update FAQ');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -51,8 +51,8 @@ const FAQsEditor: React.FC<FAQsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to delete FAQ');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -74,8 +74,8 @@ const FAQsEditor: React.FC<FAQsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to add FAQ');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 

@@ -8,6 +8,7 @@ export async function GET() {
     });
     return NextResponse.json(startups);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to fetch featured startups' },
       { status: 500 }
@@ -27,6 +28,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(newFeaturedStartup, { status: 201 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to create featured startup' },
       { status: 500 }

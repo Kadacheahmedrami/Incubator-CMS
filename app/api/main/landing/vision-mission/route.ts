@@ -8,6 +8,7 @@ export async function GET() {
     });
     return NextResponse.json(visionMissions);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to fetch vision and mission' },
       { status: 500 }
@@ -28,6 +29,7 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(newVisionMission, { status: 201 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to create vision and mission section' },
       { status: 500 }

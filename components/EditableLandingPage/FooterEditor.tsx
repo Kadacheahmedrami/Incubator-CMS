@@ -49,8 +49,8 @@ const FooterEditor: React.FC<FooterEditorProps> = ({ footer, refresh }) => {
         throw new Error(errorData.error || 'Failed to save footer');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 

@@ -35,8 +35,8 @@ const VisionAndMissionEditor: React.FC<VisionAndMissionEditorProps> = ({ items, 
         throw new Error(errorData.error || 'Failed to update vision & mission');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -51,8 +51,8 @@ const VisionAndMissionEditor: React.FC<VisionAndMissionEditorProps> = ({ items, 
         throw new Error(errorData.error || 'Failed to delete vision & mission');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -74,8 +74,8 @@ const VisionAndMissionEditor: React.FC<VisionAndMissionEditorProps> = ({ items, 
         throw new Error(errorData.error || 'Failed to add vision & mission');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 

@@ -34,8 +34,8 @@ const NewsEditor: React.FC<NewsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to update news item');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -50,8 +50,8 @@ const NewsEditor: React.FC<NewsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to delete news item');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -74,8 +74,8 @@ const NewsEditor: React.FC<NewsEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to add news item');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -219,8 +219,8 @@ const NewsImageUploader: React.FC<NewsImageUploaderProps> = ({ onUpload, publicI
             const errorData = await res.json();
             alert(errorData.error || 'Failed to upload image');
           }
-        } catch (err: any) {
-          alert(err.message);
+        } catch (err: unknown) {
+          alert(err);
         }
       }
     };

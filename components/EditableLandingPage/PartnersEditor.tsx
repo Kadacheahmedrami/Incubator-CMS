@@ -34,8 +34,8 @@ const PartnersEditor: React.FC<PartnersEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to update partner');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -50,8 +50,8 @@ const PartnersEditor: React.FC<PartnersEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to delete partner');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -73,8 +73,8 @@ const PartnersEditor: React.FC<PartnersEditorProps> = ({ items, refresh }) => {
         throw new Error(errorData.error || 'Failed to add partner');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -208,8 +208,8 @@ const PartnerImageUploader: React.FC<PartnerImageUploaderProps> = ({ onUpload, p
             const errorData = await res.json();
             alert(errorData.error || 'Failed to upload image');
           }
-        } catch (err: any) {
-          alert(err.message);
+        } catch (err: unknown) {
+          alert(err);
         }
       }
     };

@@ -53,8 +53,8 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ heroSections, refresh }) => {
         throw new Error(errorData.error || 'Failed to save hero section');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -73,8 +73,8 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ heroSections, refresh }) => {
         throw new Error(errorData.error || 'Failed to delete hero section');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -98,8 +98,8 @@ const HeroEditor: React.FC<HeroEditorProps> = ({ heroSections, refresh }) => {
         throw new Error(errorData.error || 'Failed to add hero section');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -237,8 +237,8 @@ const HeroImageUploader: React.FC<HeroImageUploaderProps> = ({ onUpload, publicI
             const errorData = await res.json();
             alert(errorData.error || 'Failed to upload image');
           }
-        } catch (err: any) {
-          alert(err.message);
+        } catch (err: unknown) {
+          alert(err);
         }
       }
     };

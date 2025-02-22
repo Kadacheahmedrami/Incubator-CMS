@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/prismaClient';
 
+
 export async function GET() {
   try {
     const faqs = await prisma.fAQ.findMany({
@@ -8,6 +9,7 @@ export async function GET() {
     });
     return NextResponse.json(faqs);
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to fetch FAQs' },
       { status: 500 }
@@ -27,7 +29,9 @@ export async function POST(request: NextRequest) {
       },
     });
     return NextResponse.json(newFAQ, { status: 201 });
+  
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to create FAQ' },
       { status: 500 }

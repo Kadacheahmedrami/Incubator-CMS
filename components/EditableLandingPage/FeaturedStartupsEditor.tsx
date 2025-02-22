@@ -35,8 +35,8 @@ const FeaturedStartupsEditor: React.FC<FeaturedStartupsEditorProps> = ({ items, 
         throw new Error(errorData.error || 'Failed to update featured startup');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -51,8 +51,8 @@ const FeaturedStartupsEditor: React.FC<FeaturedStartupsEditorProps> = ({ items, 
         throw new Error(errorData.error || 'Failed to delete featured startup');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 
@@ -73,8 +73,8 @@ const FeaturedStartupsEditor: React.FC<FeaturedStartupsEditorProps> = ({ items, 
         throw new Error(errorData.error || 'Failed to add featured startup');
       }
       refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      alert(err);
     }
   };
 

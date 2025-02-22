@@ -34,12 +34,23 @@ export interface PartnerData {
   landingPageId: number;
 }
 
+
+
+export interface StartupData {
+  id: number;
+  name: string;
+  description?: string;
+  // add any other fields as needed
+}
+
 export interface FeaturedStartupData {
   id?: number;
   startupId: number;
   order: number;
   landingPageId: number;
+  startup?: StartupData; // make it optional if it might not always be included
 }
+
 
 export interface FAQData {
   id?: number;
@@ -122,7 +133,12 @@ function transformLandingPageData(apiData: any): LandingPageData {
     historyAndValues: apiData.historyAndValues || defaults.historyAndValues,
     events: apiData.events || defaults.events,
     partners: apiData.partners || defaults.partners,
-    featuredStartups: apiData.featuredStartups || defaults.featuredStartups,
+    featuredStartups: (apiData.featuredStartups || defaults.featuredStartups).map((fs: any) => ({
+      id: fs.id,
+      startupId: fs.startupId,
+      order: fs.order,
+      landingPageId: fs.landingPageId,
+    })),
     faqs: apiData.faqs || defaults.faqs,
     programs: apiData.programs || defaults.programs,
     news: apiData.news || defaults.news,
@@ -130,6 +146,7 @@ function transformLandingPageData(apiData: any): LandingPageData {
     footer: apiData.footer || defaults.footer,
   };
 }
+
 
 export default function useLandingPageData() {
   const [data, setData] = useState<LandingPageData>(initialLandingPageData());

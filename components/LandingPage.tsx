@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import useLandingPageData, {
   HistoryAndValuesData,
   EventData,
@@ -12,7 +12,6 @@ import useLandingPageData, {
   NewsData,
   VisionAndMissionData,
   FooterData,
-  HeroData as HookHeroData,
 } from "@/hooks/useLandingPageData";
 
 // Local hero interface for component-specific data.
