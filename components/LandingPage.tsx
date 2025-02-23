@@ -1,27 +1,110 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import useLandingPageData, {
-  HistoryAndValuesData,
-  EventData,
-  PartnerData,
-  FeaturedStartupData,
-  FAQData,
-  ProgramData,
-  NewsData,
-  VisionAndMissionData,
-  FooterData,
-} from "@/hooks/useLandingPageData";
 
-// Local hero interface for component-specific data.
 export interface HeroData {
+  id?: number;
   landingImage: string;
   title: string;
   description: string;
+  landingPageId: number;
 }
 
-// Extended data shape that our sections expect.
+export interface HistoryAndValuesData {
+  id?: number;
+  title: string;
+  landingImage: string;
+  description: string;
+  order: number;
+  landingPageId: number;
+}
+
+export interface EventData {
+  id?: number;
+  title: string;
+  landingImage: string;
+  description: string;
+  order: number;
+  landingPageId: number;
+}
+
+export interface PartnerData {
+  id?: number;
+  name: string;
+  logo: string;
+  url?: string | null; // Allow null values for url
+  landingPageId: number;
+}
+
+export interface StartupData {
+  id: number;
+  name: string;
+  description?: string | null; // Allow null values for description
+}
+
+export interface FeaturedStartupData {
+  id?: number;
+  startupId: number;
+  order: number;
+  landingPageId: number;
+  startup?: StartupData;
+}
+
+export interface FAQData {
+  id?: number;
+  question: string;
+  answer: string;
+  order: number;
+  landingPageId: number;
+}
+
+export interface ProgramData {
+  id?: number;
+  title: string;
+  landingImage: string;
+  description: string;
+  order: number;
+  landingPageId: number;
+}
+
+export interface NewsData {
+  id?: number;
+  title: string;
+  landingImage: string;
+  description: string;
+  order: number;
+  landingPageId: number;
+}
+
+export interface VisionAndMissionData {
+  id?: number;
+  vision: string;
+  mission: string;
+  order: number;
+  landingPageId: number;
+}
+
+export interface FooterData {
+  id?: number;
+  content: string;
+  landingPageId: number;
+}
+
+export interface LandingPageData {
+  heroSections: HeroData[];
+  historyAndValues: HistoryAndValuesData[];
+  events: EventData[];
+  partners: PartnerData[];
+  featuredStartups: FeaturedStartupData[];
+  faqs: FAQData[];
+  programs: ProgramData[];
+  news: NewsData[];
+  visionAndMission: VisionAndMissionData[];
+  footer: FooterData | null; // Updated to allow null
+}
+
 export interface ExtendedLandingPageData {
   heroSections?: HeroData[];
   historyAndValues?: HistoryAndValuesData[];
@@ -35,33 +118,33 @@ export interface ExtendedLandingPageData {
   footer?: FooterData;
 }
 
-export const LandingPage: React.FC = () => {
-  const { data, loading, message } = useLandingPageData();
+interface LandingPageClientProps {
+  landingPageData: LandingPageData;
+}
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
-  if (message) return <p className="text-center mt-10 text-red-500">Error: {message}</p>;
-
-  // Use the heroSections array directly from our hook.
+export default function LandingPageClient({ landingPageData }: LandingPageClientProps) {
+  // Provide a fallback hero section that now includes the required landingPageId
   const safeData: ExtendedLandingPageData = {
     heroSections:
-      data.heroSections && data.heroSections.length > 0
-        ? data.heroSections
+      landingPageData.heroSections && landingPageData.heroSections.length > 0
+        ? landingPageData.heroSections
         : [
             {
               landingImage: "/placeholder.svg",
               title: "Innovate. Incubate. Accelerate.",
               description: "Empowering the next generation of startups.",
+              landingPageId: 1,
             },
           ],
-    historyAndValues: data.historyAndValues || [],
-    events: data.events || [],
-    partners: data.partners || [],
-    featuredStartups: data.featuredStartups || [],
-    faqs: data.faqs || [],
-    programs: data.programs || [],
-    news: data.news || [],
-    visionAndMission: data.visionAndMission || [],
-    footer: data.footer || { content: "", landingPageId: 1 },
+    historyAndValues: landingPageData.historyAndValues || [],
+    events: landingPageData.events || [],
+    partners: landingPageData.partners || [],
+    featuredStartups: landingPageData.featuredStartups || [],
+    faqs: landingPageData.faqs || [],
+    programs: landingPageData.programs || [],
+    news: landingPageData.news || [],
+    visionAndMission: landingPageData.visionAndMission || [],
+    footer: landingPageData.footer || { content: "", landingPageId: 1 },
   };
 
   return (
@@ -79,13 +162,11 @@ export const LandingPage: React.FC = () => {
       {safeData.footer && safeData.footer.content && <FooterSection footer={safeData.footer} />}
     </main>
   );
-};
+}
 
 const HeroSection: React.FC<{ heroData: HeroData[] }> = ({ heroData }) => {
   const [current, setCurrent] = useState(0);
-
   useEffect(() => {
-    // Cycle through hero items every 5 seconds.
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % heroData.length);
     }, 5000);
@@ -101,7 +182,6 @@ const HeroSection: React.FC<{ heroData: HeroData[] }> = ({ heroData }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: index === current ? 1 : 0 }}
           transition={{ duration: 0.8 }}
-          // Ensure the current hero is on top
           style={{ zIndex: index === current ? 10 : 0 }}
         >
           <Image
@@ -115,10 +195,7 @@ const HeroSection: React.FC<{ heroData: HeroData[] }> = ({ heroData }) => {
           <div className="relative z-10 my-[40vh] text-center text-white px-4">
             <motion.h1
               initial={{ y: 50, opacity: 0 }}
-              animate={{
-            
-                opacity: index === current ? 1 : 0,
-              }}
+              animate={{ opacity: index === current ? 1 : 0 }}
               transition={{ duration: 0.8 }}
               className="text-4xl md:text-6xl font-bold mb-4"
             >
@@ -126,35 +203,26 @@ const HeroSection: React.FC<{ heroData: HeroData[] }> = ({ heroData }) => {
             </motion.h1>
             <motion.p
               initial={{ y: 50, opacity: 0 }}
-              animate={{
-              
-                opacity: index === current ? 1 : 0,
-              }}
+              animate={{ opacity: index === current ? 1 : 0 }}
               transition={{ delay: 0.2, duration: 0.8 }}
               className="text-xl md:text-2xl mx-[10%] text-yellow-500 mb-8"
             >
               {hero.description}
             </motion.p>
-            <div className="flex flex-wrap  w-full mt-16">
-            <button className="flex-1 basis-[200px] mx-8 my-2 bg-yellow-500 rounded-lg py-2 text-white flex justify-center items-center text-2xl transition duration-200 ease-in-out border-yellow-500 border-[3px] transform hover:bg-transparent  hover:text-yellow-500">
-              Explore Now
-            </button>
-            <button className="flex-1 basis-[200px] mx-8 my-2 rounded-lg py-2 border-yellow-500 border-[3px] text-yellow-500 flex justify-center items-center text-2xl transition duration-200 ease-in-out transform hover:bg-yellow-500 hover:text-white ">
-              Learn More
-            </button>
-          </div>
-
+            <div className="flex flex-wrap w-full mt-16">
+              <button className="flex-1 basis-[200px] mx-8 my-2 bg-yellow-500 rounded-lg py-2 text-white flex justify-center items-center text-2xl transition duration-200 ease-in-out border-yellow-500 border-[3px] transform hover:bg-transparent hover:text-yellow-500">
+                Explore Now
+              </button>
+              <button className="flex-1 basis-[200px] mx-8 my-2 rounded-lg py-2 border-yellow-500 border-[3px] text-yellow-500 flex justify-center items-center text-2xl transition duration-200 ease-in-out transform hover:bg-yellow-500 hover:text-white">
+                Learn More
+              </button>
+            </div>
           </div>
         </motion.div>
-    
       ))}
     </section>
   );
 };
-
-export default HeroSection;
-
-
 
 const HistoryAndValuesSection: React.FC<{ items: HistoryAndValuesData[] }> = ({ items }) => (
   <section className="py-20 bg-white">
@@ -385,28 +453,24 @@ const VisionAndMissionSection: React.FC<{ items: VisionAndMissionData[] }> = ({ 
   </section>
 );
 
-const CtaSection: React.FC = () => {
-  return (
-    <section className="py-20 bg-blue-600 text-white">
-      <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold mb-4">Ready to Launch Your Startup?</h2>
-        <p className="text-xl mb-8">Join our incubator program today.</p>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="bg-white text-blue-600 font-bold py-3 px-8 rounded-full text-lg"
-        >
-          Apply Now
-        </motion.button>
-      </div>
-    </section>
-  );
-};
+const CtaSection: React.FC = () => (
+  <section className="py-20 bg-blue-600 text-white">
+    <div className="container mx-auto px-4 text-center">
+      <h2 className="text-3xl font-bold mb-4">Ready to Launch Your Startup?</h2>
+      <p className="text-xl mb-8">Join our incubator program today.</p>
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="bg-white text-blue-600 font-bold py-3 px-8 rounded-full text-lg"
+      >
+        Apply Now
+      </motion.button>
+    </div>
+  </section>
+);
 
 const FooterSection: React.FC<{ footer: FooterData }> = ({ footer }) => (
   <footer className="py-8 bg-gray-800 text-white">
-    <div className="container mx-auto px-4 text-center">
-      <div dangerouslySetInnerHTML={{ __html: footer.content }} />
-    </div>
+    <div className="container mx-auto px-4 text-center" dangerouslySetInnerHTML={{ __html: footer.content }} />
   </footer>
 );

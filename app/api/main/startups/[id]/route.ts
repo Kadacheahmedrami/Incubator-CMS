@@ -1,12 +1,6 @@
-// app/api/startups/[id]/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/prismaClient';
 
-/**
- * GET handler
- * Returns a specific startup by its ID.
- */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -14,89 +8,81 @@ export async function GET(
   try {
     const startup = await prisma.startup.findUnique({
       where: { id: parseInt((await params).id) },
+      include: {
+        featuredIn: true
+      }
     });
-
+    
     if (!startup) {
       return NextResponse.json(
         { error: 'Startup not found' },
         { status: 404 }
       );
     }
-
+    
     return NextResponse.json(startup);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
-    }
+  } catch (error) {
+    console.error(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to fetch startup' },
       { status: 500 }
     );
   }
 }
 
-/**
- * PUT handler
- * Updates a specific startup.
- *
- * Expects a JSON body with:
- * - name?: string
- * - landingPageId?: number
- * - description?: string
- */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { name, description, id } = await request.json();
+    const data = await request.json();
+    
+    // Validate required fields
+    if (!data.name) {
+      return NextResponse.json(
+        { error: 'Name is required' },
+        { status: 400 }
+      );
+    }
 
     const startup = await prisma.startup.update({
       where: { id: parseInt((await params).id) },
-      data: { name, description, id },
+      data: {
+        name: data.name,
+        description: data.description
+      }
     });
-
+    
     return NextResponse.json(startup);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
-    }
+  } catch (error) {
+    console.error(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to update startup' },
       { status: 500 }
     );
   }
 }
 
-/**
- * DELETE handler
- * Deletes a specific startup.
- */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await prisma.startup.delete({
-      where: { id: parseInt((await params).id) },
+    // First delete any featured entries for this startup
+    await prisma.featuredStartup.deleteMany({
+      where: { startupId: parseInt((await params).id) }
     });
 
-    return NextResponse.json({ message: 'Startup deleted successfully.' });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 500 }
-      );
-    }
+    // Then delete the startup
+    await prisma.startup.delete({
+      where: { id: parseInt((await params).id) }
+    });
+    
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    console.error(error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to delete startup' },
       { status: 500 }
     );
   }

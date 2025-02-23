@@ -1,9 +1,13 @@
-import { LandingPage } from '@/components/LandingPage';
+import { getLandingPageData } from '@/app/actions/getLandingPageData';
+import LandingPageClient from '@/components/LandingPage';
+export const dynamic = 'force-dynamic';
 
 
 
-export default async function Home() {
+export default async function LandingPagePage() {
+  console.time('LandingPageData Load Time');
+  const landingPageData = await getLandingPageData();
+  console.timeEnd('LandingPageData Load Time');
 
-
-  return <LandingPage  />;
+  return <LandingPageClient landingPageData={landingPageData} />;
 }

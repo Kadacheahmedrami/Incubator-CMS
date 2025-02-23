@@ -64,6 +64,8 @@ const EventsEditor: React.FC<EventsEditorProps> = ({ items, refresh }) => {
       landingPageId: items.length > 0 ? items[0].landingPageId : 1,
     };
     try {
+
+      alert(newItem.landingPageId)
       const res = await fetch(`/api/main/landing/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
