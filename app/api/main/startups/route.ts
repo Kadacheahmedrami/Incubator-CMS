@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/prismaClient';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const startups = await prisma.startup.findMany({
       include: {

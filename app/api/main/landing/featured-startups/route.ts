@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/prismaClient';
-import { start } from 'repl';
 
-export async function GET(request: NextRequest) {
+
+export async function GET() {
   try {
     const featuredStartups = await prisma.featuredStartup.findMany({
       include: {
@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(featuredStartup, { status: 201 });
   } catch (error) {
+    console.log(error)
     return NextResponse.json(
       { error: 'Failed to create featured startup' },
       { status: 500 }

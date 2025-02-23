@@ -19,7 +19,7 @@ const safeParseJson = async (res: Response) => {
   try {
     return await res.json();
   } catch (error) {
-    return {};
+    return {error};
   }
 };
 
