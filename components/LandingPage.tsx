@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
+// --- Data Interfaces ---
 export interface HeroData {
   id?: number;
   landingImage: string;
@@ -34,14 +35,14 @@ export interface PartnerData {
   id?: number;
   name: string;
   logo: string;
-  url?: string | null; // Allow null values for url
+  url?: string | null;
   landingPageId: number;
 }
 
 export interface StartupData {
   id: number;
   name: string;
-  description?: string | null; // Allow null values for description
+  description?: string | null;
 }
 
 export interface FeaturedStartupData {
@@ -102,7 +103,7 @@ export interface LandingPageData {
   programs: ProgramData[];
   news: NewsData[];
   visionAndMission: VisionAndMissionData[];
-  footer: FooterData | null; // Updated to allow null
+  footer: FooterData | null;
 }
 
 export interface ExtendedLandingPageData {
@@ -122,11 +123,12 @@ interface LandingPageClientProps {
   landingPageData: LandingPageData;
 }
 
+// --- Main Component ---
 export default function LandingPageClient({ landingPageData }: LandingPageClientProps) {
-  // Provide a fallback hero section that now includes the required landingPageId
-  const safeData: ExtendedLandingPageData = {
+  // Fallback data for heroSections and footer if not provided.
+  const safeData: ExtendedLandingPageData = { 
     heroSections:
-      landingPageData.heroSections && landingPageData.heroSections.length > 0
+      landingPageData.heroSections?.length
         ? landingPageData.heroSections
         : [
             {
@@ -164,8 +166,11 @@ export default function LandingPageClient({ landingPageData }: LandingPageClient
   );
 }
 
+// --- Sections ---
+
 const HeroSection: React.FC<{ heroData: HeroData[] }> = ({ heroData }) => {
   const [current, setCurrent] = useState(0);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % heroData.length);
@@ -177,7 +182,7 @@ const HeroSection: React.FC<{ heroData: HeroData[] }> = ({ heroData }) => {
     <section className="relative h-screen">
       {heroData.map((hero, index) => (
         <motion.div
-          key={index}
+          key={hero.id ?? index}
           className="absolute inset-0"
           initial={{ opacity: 0 }}
           animate={{ opacity: index === current ? 1 : 0 }}
@@ -191,7 +196,7 @@ const HeroSection: React.FC<{ heroData: HeroData[] }> = ({ heroData }) => {
             style={{ objectFit: "cover" }}
             unoptimized
           />
-          <div className="absolute inset-0 h-full flex-col flex bg-gradient-to-b from-[#000957] to-[#344CB7] opacity-50" />
+          <div className="absolute inset-0 flex flex-col h-full bg-gradient-to-b from-[#000957] to-[#344CB7] opacity-50" />
           <div className="relative z-10 my-[40vh] text-center text-white px-4">
             <motion.h1
               initial={{ y: 50, opacity: 0 }}
@@ -233,7 +238,7 @@ const HistoryAndValuesSection: React.FC<{ items: HistoryAndValuesData[] }> = ({ 
           {items
             .sort((a, b) => a.order - b.order)
             .map((item, index) => (
-              <div key={index} className="bg-gray-100 p-6 rounded-lg shadow">
+              <div key={item.id ?? index} className="bg-gray-100 p-6 rounded-lg shadow">
                 {item.landingImage && (
                   <Image
                     src={item.landingImage}
@@ -264,7 +269,7 @@ const EventsSection: React.FC<{ items: EventData[] }> = ({ items }) => (
           {items
             .sort((a, b) => a.order - b.order)
             .map((item, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow">
+              <div key={item.id ?? index} className="bg-white p-6 rounded-lg shadow">
                 {item.landingImage && (
                   <Image
                     src={item.landingImage}
@@ -287,21 +292,25 @@ const EventsSection: React.FC<{ items: EventData[] }> = ({ items }) => (
 );
 
 const PartnersSection: React.FC<{ items: PartnerData[] }> = ({ items }) => (
+  
   <section className="py-20 bg-white">
     <div className="container mx-auto px-4">
       <h2 className="text-3xl font-bold text-center mb-12">Partners</h2>
+      
       {items.length > 0 ? (
         <div className="flex flex-wrap justify-center gap-8">
           {items.map((item, index) => (
-            <div key={index} className="p-4">
+            <div key={item.id ?? index} className="p-4">
               {item.logo && (
-                <Image
-                  src={item.logo}
-                  alt={item.name}
-                  width={150}
-                  height={100}
-                  className="object-contain"
-                />
+             <Image
+             src={item.logo}
+             alt={item.name}
+             width={150}
+             height={100}
+             className="object-contain"
+             unoptimized
+           />
+           
               )}
               <p className="text-center mt-2">{item.name}</p>
             </div>
@@ -323,11 +332,11 @@ const FeaturedStartupsSection: React.FC<{ items: FeaturedStartupData[] }> = ({ i
           {items
             .sort((a, b) => a.order - b.order)
             .map((item, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow">
+              <div key={item.id ?? index} className="bg-white p-6 rounded-lg shadow">
                 <p>
                   <strong>Startup ID:</strong> {item.startupId}
                 </p>
-                {item.startupId && item.startup && (
+                {item.startup && (
                   <p>
                     <strong>Name:</strong> {item.startup.name}
                   </p>
@@ -354,7 +363,7 @@ const FAQSection: React.FC<{ items: FAQData[] }> = ({ items }) => (
           {items
             .sort((a, b) => a.order - b.order)
             .map((item, index) => (
-              <div key={index} className="p-4 border rounded">
+              <div key={item.id ?? index} className="p-4 border rounded">
                 <h3 className="text-xl font-semibold mb-2">{item.question}</h3>
                 <p>{item.answer}</p>
               </div>
@@ -376,7 +385,7 @@ const ProgramsSection: React.FC<{ items: ProgramData[] }> = ({ items }) => (
           {items
             .sort((a, b) => a.order - b.order)
             .map((item, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow">
+              <div key={item.id ?? index} className="bg-white p-6 rounded-lg shadow">
                 {item.landingImage && (
                   <Image
                     src={item.landingImage}
@@ -384,6 +393,7 @@ const ProgramsSection: React.FC<{ items: ProgramData[] }> = ({ items }) => (
                     width={300}
                     height={200}
                     className="object-cover mb-4"
+                    unoptimized
                   />
                 )}
                 <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
@@ -407,7 +417,7 @@ const NewsSection: React.FC<{ items: NewsData[] }> = ({ items }) => (
           {items
             .sort((a, b) => a.order - b.order)
             .map((item, index) => (
-              <div key={index} className="bg-gray-100 p-6 rounded-lg shadow">
+              <div key={item.id ?? index} className="bg-gray-100 p-6 rounded-lg shadow">
                 {item.landingImage && (
                   <Image
                     src={item.landingImage}
@@ -438,7 +448,7 @@ const VisionAndMissionSection: React.FC<{ items: VisionAndMissionData[] }> = ({ 
           {items
             .sort((a, b) => a.order - b.order)
             .map((item, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow">
+              <div key={item.id ?? index} className="bg-white p-6 rounded-lg shadow">
                 <h3 className="text-xl font-semibold mb-2">Vision</h3>
                 <p>{item.vision}</p>
                 <h3 className="text-xl font-semibold mt-4 mb-2">Mission</h3>

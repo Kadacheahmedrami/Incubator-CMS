@@ -1,5 +1,4 @@
 "use client"
-
 import type React from "react"
 import { useState } from "react"
 import Link from "next/link"
@@ -43,20 +42,18 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    title: "Blog",
-    href: "/main/blog",
+    title: "Community",
+    href: "/main/community",
     icon: BookOpen,
     subItems: [
-      { title: "All Posts", href: "/main/blog/posts", icon: BookOpen },
-      { title: "Categories", href: "/main/blog/categories", icon: BookOpen },
-      { title: "Tags", href: "/main/blog/tags", icon: BookOpen },
+      { title: "News", href: "/main/community/news", icon: BookOpen },
+      { title: "History", href: "/main/community/history", icon: BookOpen },
+      { title: "Events", href: "/main/community/events", icon: BookOpen },
+      { title: "Programs", href: "/main/community/programs", icon: BookOpen },
+      { title: "Startups", href: "/main/community/startups", icon: BookOpen },
     ],
   },
-  {
-    title: "Media",
-    href: "/main/media",
-    icon: Image,
-  },
+
   {
     title: "Users",
     href: "/main/users",
@@ -69,7 +66,7 @@ const navItems: NavItem[] = [
   },
 ]
 
-const NavItem: React.FC<{ item: NavItem; isOpen: boolean }> = ({ item, isOpen }) => {
+const NavItemComponent: React.FC<{ item: NavItem; isOpen: boolean }> = ({ item, isOpen }) => {
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false)
   const pathname = usePathname()
   const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
@@ -105,7 +102,7 @@ const NavItem: React.FC<{ item: NavItem; isOpen: boolean }> = ({ item, isOpen })
       {isOpen && hasSubItems && isSubMenuOpen && (
         <div className="ml-6 mt-2 space-y-2">
           {item.subItems!.map((subItem) => (
-            <NavItem key={subItem.href} item={subItem} isOpen={isOpen} />
+            <NavItemComponent key={subItem.href} item={subItem} isOpen={isOpen} />
           ))}
         </div>
       )}
@@ -121,10 +118,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
       {/* Sidebar */}
       <aside
         className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-indigo-800 to-purple-900 text-white transition-all duration-300 ease-in-out transform 
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
-        lg:relative lg:translate-x-0
-      `}
+          fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-indigo-800 to-purple-900 text-white transition-all duration-300 ease-in-out transform 
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
+          lg:relative lg:translate-x-0
+        `}
       >
         <div className="flex items-center justify-between h-16 px-4 bg-indigo-900">
           <span className="text-2xl font-bold">Dashboard</span>
@@ -137,7 +134,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         </div>
         <nav className="mt-5 px-2 space-y-3">
           {navItems.map((item) => (
-            <NavItem key={item.href} item={item} isOpen={true} />
+            <NavItemComponent key={item.href} item={item} isOpen={true} />
           ))}
         </nav>
       </aside>
@@ -180,4 +177,3 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
     </div>
   )
 }
-

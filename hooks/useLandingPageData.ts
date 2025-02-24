@@ -34,8 +34,6 @@ export interface PartnerData {
   landingPageId: number;
 }
 
-
-
 export interface StartupData {
   id: number;
   name: string;
@@ -48,9 +46,8 @@ export interface FeaturedStartupData {
   startupId: number;
   order: number;
   landingPageId: number;
-  startup?: StartupData; // make it optional if it might not always be included
+  startup?: StartupData; // optional if it might not always be included
 }
-
 
 export interface FAQData {
   id?: number;
@@ -107,15 +104,15 @@ export interface LandingPageData {
 
 function initialLandingPageData(): LandingPageData {
   return {
-    heroSections: [],
-    historyAndValues: [],
-    events: [],
-    partners: [],
-    featuredStartups: [],
-    faqs: [],
-    programs: [],
-    news: [],
-    visionAndMission: [],
+    heroSections: [] as HeroData[],
+    historyAndValues: [] as HistoryAndValuesData[],
+    events: [] as EventData[],
+    partners: [] as PartnerData[],
+    featuredStartups: [] as FeaturedStartupData[],
+    faqs: [] as FAQData[],
+    programs: [] as ProgramData[],
+    news: [] as NewsData[],
+    visionAndMission: [] as VisionAndMissionData[],
     footer: {
       content: '',
       landingPageId: 1,
@@ -125,28 +122,62 @@ function initialLandingPageData(): LandingPageData {
 
 /**
  * Transforms the API response into our expected LandingPageData shape.
+ * The new API returns join models for some sections:
+ * - featuredHistoryAndValues → historyAndValues
+ * - featuredEvents → events
+ * - featuredPrograms → programs
+ * - featuredNews → news
  */
 function transformLandingPageData(apiData: any): LandingPageData {
   const defaults = initialLandingPageData();
   return {
     heroSections: apiData.heroSections || defaults.heroSections,
-    historyAndValues: apiData.historyAndValues || defaults.historyAndValues,
-    events: apiData.events || defaults.events,
+    historyAndValues: (apiData.featuredHistoryAndValues || []).map((fhv: any) => ({
+      id: fhv.id,
+      title: fhv.historyAndValues?.title,
+      landingImage: fhv.historyAndValues?.landingImage,
+      description: fhv.historyAndValues?.description,
+      order: fhv.order,
+      landingPageId: fhv.landingPageId,
+    })),
+    events: (apiData.featuredEvents || []).map((fe: any) => ({
+      id: fe.id,
+      title: fe.event?.title,
+      landingImage: fe.event?.landingImage,
+      description: fe.event?.description,
+      order: fe.order,
+      landingPageId: fe.landingPageId,
+    })),
     partners: apiData.partners || defaults.partners,
-    featuredStartups: (apiData.featuredStartups || defaults.featuredStartups).map((fs: any) => ({
+    featuredStartups: (apiData.featuredStartups || []).map((fs: any) => ({
       id: fs.id,
       startupId: fs.startupId,
       order: fs.order,
       landingPageId: fs.landingPageId,
+      startup: fs.startup,
     })),
-    faqs: apiData.faqs || defaults.faqs,
-    programs: apiData.programs || defaults.programs,
-    news: apiData.news || defaults.news,
+    // FAQs should be an array of FAQData. If the API returns it correctly, no mapping is needed.
+    faqs: apiData.faqs || ([] as FAQData[]),
+    programs: (apiData.featuredPrograms || []).map((fp: any) => ({
+      id: fp.id,
+      title: fp.program?.title,
+      landingImage: fp.program?.landingImage,
+      description: fp.program?.description,
+      order: fp.order,
+      landingPageId: fp.landingPageId,
+    })),
+    news: (apiData.featuredNews || []).map((fn: any) => ({
+      id: fn.id,
+      title: fn.news?.title,
+      landingImage: fn.news?.landingImage,
+      description: fn.news?.description,
+      order: fn.order,
+      landingPageId: fn.landingPageId,
+    })),
     visionAndMission: apiData.visionAndMission || defaults.visionAndMission,
     footer: apiData.footer || defaults.footer,
   };
 }
-
 
 export default function useLandingPageData() {
   const [data, setData] = useState<LandingPageData>(initialLandingPageData());
@@ -159,7 +190,7 @@ export default function useLandingPageData() {
       const res = await fetch('/api/main/landing');
       if (!res.ok) throw new Error('Failed to load landing page data');
       const json = await res.json();
-      console.log("data == ", json);
+      console.log("API data:", json);
       const transformed = transformLandingPageData(json);
       setData(transformed);
     } catch (err: any) {

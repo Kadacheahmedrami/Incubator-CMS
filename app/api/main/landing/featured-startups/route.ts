@@ -1,99 +1,30 @@
+// app/api/main/landing/featured-startups/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/prismaClient';
-
 
 export async function GET() {
   try {
     const featuredStartups = await prisma.featuredStartup.findMany({
-      include: {
-        startup: {
-          select: {
-            name: true,
-            description: true
-          }
-        }
-      },
-      orderBy: {
-        order: 'asc'
-      }
+      orderBy: { order: 'asc' },
+      include: { startup: true },
     });
-   
     return NextResponse.json(featuredStartups);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: 'Failed to fetch featured startups' },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error fetching featured startups';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function PUT(request: NextRequest) {
   try {
-    const data = await request.json();
-   
-    // Validate required fields
-    if (!data.startupId) {
-      return NextResponse.json(
-        { error: 'Startup ID is required' },
-        { status: 400 }
-      );
-    }
-
-    // Check if startup exists
-    const startup = await prisma.startup.findUnique({
-      where: { id: data.startupId }
+    const payload = await request.json();
+    await prisma.$transaction(async (tx) => {
+      await tx.featuredStartup.deleteMany();
+      await tx.featuredStartup.createMany({ data: payload });
     });
-
-    if (!startup) {
-      return NextResponse.json(
-        { error: 'Startup not found' },
-        { status: 404 }
-      );
-    }
-
-    // Check if startup is already featured
-    const existingFeatured = await prisma.featuredStartup.findFirst({
-      where: {
-        startupId: data.startupId,
-        landingPageId: data.landingPageId
-      }
-    });
-
-
-    if (existingFeatured) {
-      return NextResponse.json(
-        { error: 'Startup is already featured' },
-        { status: 400 }
-      );
-    }
-
-    // Get max order if not provided
-    
-    if (!data.order) {
-      const maxOrder = await prisma.featuredStartup.findFirst({
-        where: { landingPageId: data.landingPageId },
-        orderBy: { order: 'desc' }
-      });
-      data.order = maxOrder ? maxOrder.order + 1 : 1;
-    }
-    console.log("startup ==",startup)
-    console.log("data ==",data)
-    const featuredStartup = await prisma.featuredStartup.create({
-      data: {
-        startupId: data.startupId,
-        landingPageId: data.landingPageId,
-        order: data.order,
-      },
-
-    });
-    
-    return NextResponse.json(featuredStartup, { status: 201 });
-  } catch (error) {
-    console.log(error)
-    return NextResponse.json(
-      { error: 'Failed to create featured startup' },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: 'Featured startups updated' });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error updating featured startups';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

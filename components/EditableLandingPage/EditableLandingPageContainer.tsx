@@ -1,23 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
-
 import useLandingPageData from '@/hooks/useLandingPageData';
 
-import HeroEditor from './HeroEditor';
-import HistoryAndValuesEditor from './HistoryAndValuesEditor';
-import EventsEditor from './EventsEditor';
-import PartnersEditor from './PartnersEditor';
-import FeaturedStartupsEditor from './FeaturedStartupsEditor';
-import FAQsEditor from './FAQsEditor';
-import ProgramsEditor from './ProgramsEditor';
-import NewsEditor from './NewsEditor';
-import VisionAndMissionEditor from './VisionAndMissionEditor';
-import FooterEditor from './FooterEditor';
+import HeroEditor from '@/components/EditableLandingPage/HeroEditor';
+
+import PartnersEditor from '@/components/EditableLandingPage/PartnersEditor';
+
+import FAQsEditor from '@/components/EditableLandingPage/FAQsEditor';
+
+
+import VisionAndMissionEditor from '@/components/EditableLandingPage/VisionAndMissionEditor';
+import FooterEditor from '@/components/EditableLandingPage/FooterEditor';
 
 const EditableLandingPageContainer: React.FC = () => {
   const { data, loading, message, refreshData } = useLandingPageData();
-  const [globalMessage, ] = useState('');
+  const [globalMessage] = useState('');
   
   if (loading) return <div className="p-8 text-center">Loading...</div>;
 
@@ -30,13 +28,13 @@ const EditableLandingPageContainer: React.FC = () => {
         </div>
       )}
       <HeroEditor heroSections={data.heroSections} refresh={refreshData} />
-      <HistoryAndValuesEditor items={data.historyAndValues} refresh={refreshData} />
-      <EventsEditor items={data.events} refresh={refreshData} />
+  
+   
       <PartnersEditor items={data.partners} refresh={refreshData} />
-      <FeaturedStartupsEditor items={data.featuredStartups} refresh={refreshData} />
+
       <FAQsEditor items={data.faqs} refresh={refreshData} />
-      <ProgramsEditor items={data.programs} refresh={refreshData} />
-      <NewsEditor items={data.news} refresh={refreshData} />
+
+   
       <VisionAndMissionEditor items={data.visionAndMission} refresh={refreshData} />
       <FooterEditor footer={data.footer} refresh={refreshData} />
       {message && <div className="mt-4 text-center text-red-600">{message}</div>}
@@ -45,3 +43,4 @@ const EditableLandingPageContainer: React.FC = () => {
 };
 
 export default EditableLandingPageContainer;
+  
