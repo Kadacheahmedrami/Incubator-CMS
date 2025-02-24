@@ -207,10 +207,10 @@ const NewsImageUploader: React.FC<NewsImageUploaderProps> = ({ onUpload, publicI
       const base64data = reader.result;
       if (typeof base64data === 'string') {
         try {
-          const res = await fetch('/api/main/landing/news/upload', {
+          const res = await fetch('/api/main/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: base64data, publicId }),
+            body: JSON.stringify({ image: base64data, publicId ,type:"news"}),
           });
           if (res.ok) {
             const data = await res.json();

@@ -207,10 +207,10 @@ const ProgramImageUploader: React.FC<ProgramImageUploaderProps> = ({ onUpload, p
       const base64data = reader.result;
       if (typeof base64data === 'string') {
         try {
-          const res = await fetch('/api/main/landing/programs/upload', {
+          const res = await fetch('/api/main/upload', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: base64data, publicId }),
+            body: JSON.stringify({ image: base64data, publicId ,type:"programs" }),
           });
           if (res.ok) {
             const data = await res.json();

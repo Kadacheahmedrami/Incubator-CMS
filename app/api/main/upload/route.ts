@@ -10,18 +10,19 @@ cloudinary.config({
 
 export async function POST(req: NextRequest) {
   try {
-    const { image, publicId } = await req.json();
+    
+    const { image, publicId ,type } = await req.json();
 
     if (!image) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });
     }
 
     // Use the provided publicId if available; otherwise fallback.
-    const finalPublicId = publicId ? publicId : "history";
+    const finalPublicId = publicId ? publicId : type;
 
     // Upload the image using the final public_id.
     const uploadedImage = await cloudinary.uploader.upload(image, {
-      folder: "incubator/history",
+      folder:`incubator/${type}`,
       public_id: finalPublicId,
       overwrite: true, // ensures the image is replaced if it already exists
     });
