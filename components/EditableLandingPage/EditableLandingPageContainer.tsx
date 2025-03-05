@@ -8,7 +8,7 @@ import HeroEditor from '@/components/EditableLandingPage/HeroEditor';
 import PartnersEditor from '@/components/EditableLandingPage/PartnersEditor';
 
 import FAQsEditor from '@/components/EditableLandingPage/FAQsEditor';
-
+import FeaturedStartupSelector from '@/components/EditableLandingPage/FeturedStartups';
 
 import VisionAndMissionEditor from '@/components/EditableLandingPage/VisionAndMissionEditor';
 import FooterEditor from '@/components/EditableLandingPage/FooterEditor';
@@ -33,8 +33,9 @@ const EditableLandingPageContainer: React.FC = () => {
       <PartnersEditor items={data.partners} refresh={refreshData} />
 
       <FAQsEditor items={data.faqs} refresh={refreshData} />
-
-   
+      <FeaturedStartupSelector></FeaturedStartupSelector>
+      
+      
       <VisionAndMissionEditor items={data.visionAndMission} refresh={refreshData} />
       <FooterEditor footer={data.footer} refresh={refreshData} />
       {message && <div className="mt-4 text-center text-red-600">{message}</div>}

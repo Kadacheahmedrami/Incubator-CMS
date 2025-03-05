@@ -14,6 +14,7 @@ import {
   Menu,
   Bell,
   User,
+  History
 } from "lucide-react"
 
 type NavItem = {
@@ -45,6 +46,11 @@ const navItems: NavItem[] = [
     title: "Startups",
     href: "/main/startups",
     icon: Building2,
+  },
+  {
+    title: "HistoryAndValues",
+    href: "/main/HistoryAndValues",
+    icon: History,
   },
 
   {
