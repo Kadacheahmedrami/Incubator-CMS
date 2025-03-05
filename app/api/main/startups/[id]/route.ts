@@ -37,20 +37,29 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // First, await the request body before accessing params
+  const data = await request.json();
+
+  // Now it’s safe to use params.id
   const startupId = parseStartupId(params.id);
   if (startupId === null) {
     return NextResponse.json({ error: 'Invalid startup id' }, { status: 400 });
   }
+
+  // Exclude nested relations that you do not want to update directly
+  const { mentors, founders, ...updateData } = data;
+
   try {
-    const data = await request.json();
     const updated = await prisma.startup.update({
       where: { id: startupId },
-      data,
+      data: updateData,
     });
     return NextResponse.json(updated);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('PUT startup error:', error);
-    return NextResponse.json({ error: 'Failed to update startup' }, { status: 500 });
+    const message =
+      error instanceof Error ? error.message : 'Failed to update startup';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

@@ -8,8 +8,7 @@ import {
   ChevronRight,
   LayoutDashboard,
   FileText,
-  BookOpen,
-  Image,
+  Building2,
   Users,
   Settings,
   Menu,
@@ -41,17 +40,11 @@ const navItems: NavItem[] = [
       { title: "Contact", href: "/main/pages/contact", icon: FileText },
     ],
   },
+
   {
-    title: "Community",
-    href: "/main/community",
-    icon: BookOpen,
-    subItems: [
-      { title: "News", href: "/main/community/news", icon: BookOpen },
-      { title: "History", href: "/main/community/history", icon: BookOpen },
-      { title: "Events", href: "/main/community/events", icon: BookOpen },
-      { title: "Programs", href: "/main/community/programs", icon: BookOpen },
-      { title: "Startups", href: "/main/community/startups", icon: BookOpen },
-    ],
+    title: "Startups",
+    href: "/main/startups",
+    icon: Building2,
   },
 
   {
