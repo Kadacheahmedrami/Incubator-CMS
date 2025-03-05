@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import useLandingPageData from '@/hooks/useLandingPageData';
 
 import HeroEditor from '@/components/EditableLandingPage/HeroEditor';
-
+import FeaturedHistoryAndValuesSelector from '@/components/EditableLandingPage/FeturedHistoryAndValues';
 import PartnersEditor from '@/components/EditableLandingPage/PartnersEditor';
 
 import FAQsEditor from '@/components/EditableLandingPage/FAQsEditor';
@@ -34,8 +34,8 @@ const EditableLandingPageContainer: React.FC = () => {
 
       <FAQsEditor items={data.faqs} refresh={refreshData} />
       <FeaturedStartupSelector></FeaturedStartupSelector>
-      
-      
+      <FeaturedHistoryAndValuesSelector></FeaturedHistoryAndValuesSelector>
+
       <VisionAndMissionEditor items={data.visionAndMission} refresh={refreshData} />
       <FooterEditor footer={data.footer} refresh={refreshData} />
       {message && <div className="mt-4 text-center text-red-600">{message}</div>}

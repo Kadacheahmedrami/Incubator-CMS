@@ -1,5 +1,5 @@
 "use client";
-import FeaturedStartupSelector from '@/components/EditableLandingPage/FeturedStartups';
+import FeaturedHistoryAndValuesSelector from '@/components/EditableLandingPage/FeturedHistoryAndValues';
 // By default, the CldImage component applies auto-format and auto-quality to all delivery URLs for optimized delivery.
 export default function Page() {
   return (
@@ -8,7 +8,7 @@ export default function Page() {
 
 
 
-<FeaturedStartupSelector></FeaturedStartupSelector>          
+<FeaturedHistoryAndValuesSelector></FeaturedHistoryAndValuesSelector>          
     </>
  
   );
