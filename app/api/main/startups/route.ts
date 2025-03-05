@@ -21,10 +21,50 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    const startup = await prisma.startup.create({ data });
+
+    // Validate required fields
+    const { name, idea, founderId, imageUrl } = data;
+    if (!name || !idea || !founderId) {
+      return NextResponse.json(
+        { error: 'Missing required fields: name, idea and founderId' },
+        { status: 400 }
+      );
+    }
+
+    // Check that the founder exists and that their role is USER
+    const user = await prisma.user.findUnique({
+      where: { id: founderId },
+    });
+    if (!user || user.role !== 'USER') {
+      return NextResponse.json(
+        { error: 'Founder must exist and have role USER' },
+        { status: 400 }
+      );
+    }
+
+    // Create the startup with nested founder creation
+    const startup = await prisma.startup.create({
+      data: {
+        name,
+        idea,
+        imageUrl: imageUrl || null,
+        founders: {
+          create: {
+            founder: {
+              connect: { id: founderId },
+            },
+          },
+        },
+      },
+      include: {
+        founders: true, // Include the founders relation in the response
+      },
+    });
+
     return NextResponse.json(startup);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error creating startup';
+    const message =
+      error instanceof Error ? error.message : 'Error creating startup';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

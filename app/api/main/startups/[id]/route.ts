@@ -1,4 +1,3 @@
-// app/api/main/startups/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/prismaClient';
 
@@ -37,16 +36,40 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // First, await the request body before accessing params
+  // Await the request body first
   const data = await request.json();
 
-  // Now it’s safe to use params.id
+  // Parse the startup id
   const startupId = parseStartupId(params.id);
   if (startupId === null) {
     return NextResponse.json({ error: 'Invalid startup id' }, { status: 400 });
   }
 
-  // Exclude nested relations that you do not want to update directly
+  // First, ensure that the startup has at least one founder with role 'USER'
+  const existingStartup = await prisma.startup.findUnique({
+    where: { id: startupId },
+    include: { founders: { include: { founder: true } } },
+  });
+
+  if (!existingStartup || existingStartup.founders.length === 0) {
+    return NextResponse.json(
+      { error: 'Each startup must have at least one founder' },
+      { status: 400 }
+    );
+  }
+
+  // Check if at least one of the founders has role "USER"
+  const hasUserFounder = existingStartup.founders.some(
+    (f) => f.founder.role === 'USER'
+  );
+  if (!hasUserFounder) {
+    return NextResponse.json(
+      { error: 'Each startup must have at least one founder with role USER' },
+      { status: 400 }
+    );
+  }
+
+  // Exclude nested relations that you do not intend to update directly
   const { mentors, founders, ...updateData } = data;
 
   try {
