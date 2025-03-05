@@ -21,50 +21,49 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
+    const { name, idea, founderIds, imageUrl } = data;
 
-    // Validate required fields
-    const { name, idea, founderId, imageUrl } = data;
-    if (!name || !idea || !founderId) {
+    // Validate required fields: name, idea and at least one founder in founderIds
+    if (!name || !idea || !founderIds || !Array.isArray(founderIds) || founderIds.length === 0) {
       return NextResponse.json(
-        { error: 'Missing required fields: name, idea and founderId' },
+        { error: 'Missing required fields: name, idea and at least one founder' },
         { status: 400 }
       );
     }
 
-    // Check that the founder exists and that their role is USER
-    const user = await prisma.user.findUnique({
-      where: { id: founderId },
-    });
-    if (!user || user.role !== 'USER') {
-      return NextResponse.json(
-        { error: 'Founder must exist and have role USER' },
-        { status: 400 }
-      );
+    // Validate each founderId corresponds to a user with role 'USER'
+    for (const founderId of founderIds) {
+      const user = await prisma.user.findUnique({ where: { id: founderId } });
+      if (!user || user.role !== 'USER') {
+        return NextResponse.json(
+          { error: 'Each founder must exist and have role USER' },
+          { status: 400 }
+        );
+      }
     }
 
-    // Create the startup with nested founder creation
+    // Create the startup and create nested founder relations using the provided founderIds
     const startup = await prisma.startup.create({
       data: {
         name,
         idea,
         imageUrl: imageUrl || null,
         founders: {
-          create: {
+          create: founderIds.map((id: string) => ({
             founder: {
-              connect: { id: founderId },
+              connect: { id },
             },
-          },
+          })),
         },
       },
       include: {
-        founders: true, // Include the founders relation in the response
+        founders: true,
       },
     });
 
     return NextResponse.json(startup);
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : 'Error creating startup';
+    const message = error instanceof Error ? error.message : 'Error creating startup';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

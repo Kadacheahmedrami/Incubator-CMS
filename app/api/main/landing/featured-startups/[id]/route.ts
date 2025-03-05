@@ -1,4 +1,3 @@
-// app/api/main/landing/featured-startups/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/prismaClient';
 
@@ -11,23 +10,22 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const fsId = parseFeaturedStartupId(params.id);
-  if (fsId === null) {
+  const featuredId = parseFeaturedStartupId(params.id);
+  if (featuredId === null) {
     return NextResponse.json({ error: 'Invalid featured startup id' }, { status: 400 });
   }
-
   try {
     const featuredStartup = await prisma.featuredStartup.findUnique({
-      where: { id: fsId },
-      include: { startup: true },
+      where: { id: featuredId },
+      include: { startup: true, landingPage: true },
     });
     if (!featuredStartup) {
       return NextResponse.json({ error: 'Featured startup not found' }, { status: 404 });
     }
     return NextResponse.json(featuredStartup);
-  } catch (error) {
-    console.error('GET featured startup error:', error);
-    return NextResponse.json({ error: 'Failed to fetch featured startup' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch featured startup';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -35,28 +33,37 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const fsId = parseFeaturedStartupId(params.id);
-  if (fsId === null) {
+  const featuredId = parseFeaturedStartupId(params.id);
+  if (featuredId === null) {
     return NextResponse.json({ error: 'Invalid featured startup id' }, { status: 400 });
   }
-  
   try {
     const data = await request.json();
-    if (
-      typeof data.startupId !== 'number' ||
-      typeof data.landingPageId !== 'number' ||
-      typeof data.order !== 'number'
-    ) {
-      return NextResponse.json({ error: 'Missing or invalid required fields' }, { status: 400 });
+    const { landingPageId, startupId, order } = data;
+
+    // Optional: Validate that the provided landingPageId and startupId exist
+    if (landingPageId) {
+      const landingPage = await prisma.landingPage.findUnique({ where: { id: landingPageId } });
+      if (!landingPage) {
+        return NextResponse.json({ error: 'Landing page not found' }, { status: 400 });
+      }
     }
-    const updatedFS = await prisma.featuredStartup.update({
-      where: { id: fsId },
-      data,
+    if (startupId) {
+      const startup = await prisma.startup.findUnique({ where: { id: startupId } });
+      if (!startup) {
+        return NextResponse.json({ error: 'Startup not found' }, { status: 400 });
+      }
+    }
+
+    const updatedFeatured = await prisma.featuredStartup.update({
+      where: { id: featuredId },
+      data: { landingPageId, startupId, order },
+      include: { startup: true, landingPage: true },
     });
-    return NextResponse.json(updatedFS);
-  } catch (error) {
-    console.error('PUT featured startup error:', error);
-    return NextResponse.json({ error: 'Failed to update featured startup' }, { status: 500 });
+    return NextResponse.json(updatedFeatured);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to update featured startup';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -64,20 +71,15 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const fsId = parseFeaturedStartupId(params.id);
-  if (fsId === null) {
+  const featuredId = parseFeaturedStartupId(params.id);
+  if (featuredId === null) {
     return NextResponse.json({ error: 'Invalid featured startup id' }, { status: 400 });
   }
-  
   try {
-    const record = await prisma.featuredStartup.findUnique({ where: { id: fsId } });
-    if (!record) {
-      return NextResponse.json({ error: 'Featured startup not found' }, { status: 404 });
-    }
-    await prisma.featuredStartup.delete({ where: { id: fsId } });
+    await prisma.featuredStartup.delete({ where: { id: featuredId } });
     return new NextResponse(null, { status: 204 });
-  } catch (error) {
-    console.error('DELETE featured startup error:', error);
-    return NextResponse.json({ error: 'Failed to delete featured startup' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to delete featured startup';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

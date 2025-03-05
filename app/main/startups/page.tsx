@@ -10,6 +10,14 @@ interface Startup {
   createdAt: string;
 }
 
+interface User {
+  id: string;
+  email: string;
+  name?: string;
+  role: string;
+  createdAt: string;
+}
+
 const StartupsPage = () => {
   const [startups, setStartups] = useState<Startup[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -24,6 +32,11 @@ const StartupsPage = () => {
 
   // State for editing a startup
   const [editingStartup, setEditingStartup] = useState<Startup | null>(null);
+
+  // State for available users with role USER to select as founders
+  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+  // State for selected founder IDs for the new startup
+  const [selectedFounderIds, setSelectedFounderIds] = useState<string[]>([]);
 
   // Fetch all startups from the API
   const fetchStartups = async () => {
@@ -40,8 +53,23 @@ const StartupsPage = () => {
     }
   };
 
+  // Fetch users with role USER
+  const fetchAvailableUsers = async () => {
+    try {
+      const res = await fetch('/api/main/users');
+      if (!res.ok) throw new Error('Failed to fetch users');
+      const data: User[] = await res.json();
+      // Filter for users with role "USER"
+      const userCandidates = data.filter((user) => user.role === 'USER');
+      setAvailableUsers(userCandidates);
+    } catch (err: any) {
+      console.error('Error fetching available users:', err.message);
+    }
+  };
+
   useEffect(() => {
     fetchStartups();
+    fetchAvailableUsers();
   }, []);
 
   // Handle changes in the new startup or edit forms
@@ -111,24 +139,49 @@ const StartupsPage = () => {
     }
   };
 
-  // Add a new startup
+  // Handle founder selection (checkbox toggle)
+  const handleFounderSelection = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    userId: string
+  ) => {
+    if (e.target.checked) {
+      setSelectedFounderIds((prev) => [...prev, userId]);
+    } else {
+      setSelectedFounderIds((prev) => prev.filter((id) => id !== userId));
+    }
+  };
+
+  // Add a new startup with selected founders
   const handleAddStartup = async () => {
+    if (!newStartup.name || !newStartup.idea) {
+      alert('Please provide a startup name and description');
+      return;
+    }
+    if (selectedFounderIds.length === 0) {
+      alert('Please select at least one founder');
+      return;
+    }
     try {
+      const payload = {
+        ...newStartup,
+        founderIds: selectedFounderIds,
+      };
       const res = await fetch('/api/main/startups', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newStartup),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error('Failed to add startup');
       await res.json();
       setNewStartup({ name: '', idea: '', imageUrl: '' });
+      setSelectedFounderIds([]);
       fetchStartups();
     } catch (err: any) {
       alert(err.message);
     }
   };
 
-  // Update an existing startup
+  // Update an existing startup (editing UI remains the same for now)
   const handleUpdate = async () => {
     if (!editingStartup) return;
     try {
@@ -199,6 +252,27 @@ const StartupsPage = () => {
               onChange={handleNewFileChange}
               className="border p-2 rounded"
             />
+          </div>
+        </div>
+        {/* Founder Selection */}
+        <div className="mt-4">
+          <h3 className="text-xl font-semibold mb-2">Select Founders</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {availableUsers.map((user) => (
+              <label
+                key={user.id}
+                className="flex items-center space-x-2 p-2 border rounded hover:bg-gray-100"
+              >
+                <input
+                  type="checkbox"
+                  value={user.id}
+                  checked={selectedFounderIds.includes(user.id)}
+                  onChange={(e) => handleFounderSelection(e, user.id)}
+                  className="form-checkbox"
+                />
+                <span>{user.email}</span>
+              </label>
+            ))}
           </div>
         </div>
         <button
