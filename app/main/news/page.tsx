@@ -111,18 +111,34 @@ export default function NewsPage() {
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
         />
-        <input
-          type="text"
-          placeholder="Image URL"
-          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          value={formData.landingImage}
-          onChange={(e) => setFormData({ ...formData, landingImage: e.target.value })}
-        />
-        <input
-          type="file"
-          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          onChange={handleFileChange}
-        />
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              id="image-upload"
+            />
+            <label
+              htmlFor="image-upload"
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 cursor-pointer flex items-center space-x-2"
+            >
+              <Upload className="h-4 w-4" />
+              <span>{uploading ? 'Uploading...' : 'Choose Image'}</span>
+            </label>
+            {formData.landingImage && (
+              <div className="flex items-center space-x-2">
+                <img
+                  src={formData.landingImage}
+                  alt="Preview"
+                  className="w-10 h-10 object-cover rounded"
+                />
+                <span className="text-sm text-gray-500">Uploaded</span>
+              </div>
+            )}
+          </div>
+        </div>
         <textarea
           placeholder="Description"
           className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
@@ -133,7 +149,6 @@ export default function NewsPage() {
           <button
             type="submit"
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            disabled={uploading}
           >
             {isEditing ? 'Update News' : 'Add News'}
           </button>
@@ -148,7 +163,7 @@ export default function NewsPage() {
           )}
         </div>
       </form>
-
+      
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">

@@ -107,23 +107,41 @@ export default function ProgramsPage() {
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
         />
-        <input
-          type="text"
-          placeholder="Image URL"
-          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          value={formData.landingImage}
-          onChange={(e) => setFormData({ ...formData, landingImage: e.target.value })}
-        />
+        
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              id="image-upload"
+            />
+            <label
+              htmlFor="image-upload"
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 cursor-pointer flex items-center space-x-2"
+            >
+              <Upload className="h-4 w-4" />
+              <span>{uploading ? 'Uploading...' : 'Choose Image'}</span>
+            </label>
+            {formData.landingImage && (
+              <div className="flex items-center space-x-2">
+                <img 
+                  src={formData.landingImage} 
+                  alt="Preview" 
+                  className="w-10 h-10 object-cover rounded"
+                />
+                <span className="text-sm text-gray-500">Uploaded</span>
+              </div>
+            )}
+          </div>
+        </div>
+
         <textarea
           placeholder="Description"
           className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-        />
-        <input
-          type="file"
-          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          onChange={handleFileChange}
         />
         <div className="flex space-x-2">
           <button
