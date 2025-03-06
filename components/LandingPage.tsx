@@ -14,21 +14,37 @@ export interface HeroData {
 }
 
 export interface HistoryAndValuesData {
-  id?: number;
+  id: number;
   title: string;
   landingImage: string;
   description: string;
-  order: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface FeaturedHistoryAndValue {
+  id: number;
+  historyAndValueId: number;
   landingPageId: number;
+  order: number;
+  historyAndValue: HistoryAndValuesData;
 }
 
 export interface EventData {
-  id?: number;
+  id: number;
   title: string;
   landingImage: string;
   description: string;
-  order: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface FeaturedEvent {
+  id: number;
+  eventId: number;
   landingPageId: number;
+  order: number;
+  event: EventData;
 }
 
 export interface PartnerData {
@@ -62,21 +78,37 @@ export interface FAQData {
 }
 
 export interface ProgramData {
-  id?: number;
+  id: number;
   title: string;
   landingImage: string;
   description: string;
-  order: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface FeaturedProgram {
+  id: number;
+  programId: number;
   landingPageId: number;
+  order: number;
+  program: ProgramData;
 }
 
 export interface NewsData {
-  id?: number;
+  id: number;
   title: string;
   landingImage: string;
   description: string;
-  order: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface FeaturedNews {
+  id: number;
+  newsId: number;
   landingPageId: number;
+  order: number;
+  news: NewsData;
 }
 
 export interface VisionAndMissionData {
@@ -95,13 +127,13 @@ export interface FooterData {
 
 export interface LandingPageData {
   heroSections: HeroData[];
-  historyAndValues: HistoryAndValuesData[];
-  events: EventData[];
+  featuredHistoryAndValues: FeaturedHistoryAndValue[];
+  featuredEvents: FeaturedEvent[];
   partners: PartnerData[];
   featuredStartups: FeaturedStartupData[];
   faqs: FAQData[];
-  programs: ProgramData[];
-  news: NewsData[];
+  featuredPrograms: FeaturedProgram[];
+  featuredNews: FeaturedNews[];
   visionAndMission: VisionAndMissionData[];
   footer: FooterData | null;
 }
@@ -126,40 +158,30 @@ interface LandingPageClientProps {
 // --- Main Component ---
 export default function LandingPageClient({ landingPageData }: LandingPageClientProps) {
   // Fallback data for heroSections and footer if not provided.
-  const safeData: ExtendedLandingPageData = { 
-    heroSections:
-      landingPageData.heroSections?.length
-        ? landingPageData.heroSections
-        : [
-            {
-              landingImage: "/placeholder.svg",
-              title: "Innovate. Incubate. Accelerate.",
-              description: "Empowering the next generation of startups.",
-              landingPageId: 1,
-            },
-          ],
-    historyAndValues: landingPageData.historyAndValues || [],
-    events: landingPageData.events || [],
+  const safeData: LandingPageData = {
+    heroSections: landingPageData.heroSections || [],
+    featuredHistoryAndValues: landingPageData.featuredHistoryAndValues || [],
+    featuredEvents: landingPageData.featuredEvents || [],
     partners: landingPageData.partners || [],
     featuredStartups: landingPageData.featuredStartups || [],
     faqs: landingPageData.faqs || [],
-    programs: landingPageData.programs || [],
-    news: landingPageData.news || [],
+    featuredPrograms: landingPageData.featuredPrograms || [],
+    featuredNews: landingPageData.featuredNews || [],
     visionAndMission: landingPageData.visionAndMission || [],
-    footer: landingPageData.footer || { content: "", landingPageId: 1 },
+    footer: landingPageData.footer || null,
   };
 
   return (
     <main className="font-sans text-gray-900">
-      <HeroSection heroData={safeData.heroSections!} />
-      <HistoryAndValuesSection items={safeData.historyAndValues!} />
-      <EventsSection items={safeData.events!} />
-      <PartnersSection items={safeData.partners!} />
-      <FeaturedStartupsSection items={safeData.featuredStartups!} />
-      <FAQSection items={safeData.faqs!} />
-      <ProgramsSection items={safeData.programs!} />
-      <NewsSection items={safeData.news!} />
-      <VisionAndMissionSection items={safeData.visionAndMission!} />
+      <HeroSection heroData={safeData.heroSections} />
+      <HistoryAndValuesSection items={safeData.featuredHistoryAndValues.map(f => f.historyAndValue)} />
+      <EventsSection items={safeData.featuredEvents.map(f => f.event)} />
+      <PartnersSection items={safeData.partners} />
+      <FeaturedStartupsSection items={safeData.featuredStartups} />
+      <FAQSection items={safeData.faqs} />
+      <ProgramsSection items={safeData.featuredPrograms.map(f => f.program)} />
+      <NewsSection items={safeData.featuredNews.map(f => f.news)} />
+      <VisionAndMissionSection items={safeData.visionAndMission} />
       <CtaSection />
       {safeData.footer && safeData.footer.content && <FooterSection footer={safeData.footer} />}
     </main>
@@ -235,23 +257,21 @@ const HistoryAndValuesSection: React.FC<{ items: HistoryAndValuesData[] }> = ({ 
       <h2 className="text-3xl font-bold text-center mb-12">History & Values</h2>
       {items.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {items
-            .sort((a, b) => a.order - b.order)
-            .map((item, index) => (
-              <div key={item.id ?? index} className="bg-gray-100 p-6 rounded-lg shadow">
-                {item.landingImage && (
-                  <Image
-                    src={item.landingImage}
-                    alt={item.title}
-                    width={300}
-                    height={200}
-                    className="object-cover mb-4"
-                  />
-                )}
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p>{item.description}</p>
-              </div>
-            ))}
+          {items.map((item, index) => (
+            <div key={item.id ?? index} className="bg-gray-100 p-6 rounded-lg shadow">
+              {item.landingImage && (
+                <Image
+                  src={item.landingImage}
+                  alt={item.title}
+                  width={300}
+                  height={200}
+                  className="object-cover mb-4"
+                />
+              )}
+              <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+              <p>{item.description}</p>
+            </div>
+          ))}
         </div>
       ) : (
         <p className="text-center">No History & Values data available.</p>
@@ -266,23 +286,21 @@ const EventsSection: React.FC<{ items: EventData[] }> = ({ items }) => (
       <h2 className="text-3xl font-bold text-center mb-12">Events</h2>
       {items.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {items
-            .sort((a, b) => a.order - b.order)
-            .map((item, index) => (
-              <div key={item.id ?? index} className="bg-white p-6 rounded-lg shadow">
-                {item.landingImage && (
-                  <Image
-                    src={item.landingImage}
-                    alt={item.title}
-                    width={300}
-                    height={200}
-                    className="object-cover mb-4"
-                  />
-                )}
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p>{item.description}</p>
-              </div>
-            ))}
+          {items.map((item, index) => (
+            <div key={item.id ?? index} className="bg-white p-6 rounded-lg shadow">
+              {item.landingImage && (
+                <Image
+                  src={item.landingImage}
+                  alt={item.title}
+                  width={300}
+                  height={200}
+                  className="object-cover mb-4"
+                />
+              )}
+              <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+              <p>{item.description}</p>
+            </div>
+          ))}
         </div>
       ) : (
         <p className="text-center">No Events data available.</p>
@@ -292,25 +310,22 @@ const EventsSection: React.FC<{ items: EventData[] }> = ({ items }) => (
 );
 
 const PartnersSection: React.FC<{ items: PartnerData[] }> = ({ items }) => (
-  
   <section className="py-20 bg-white">
     <div className="container mx-auto px-4">
       <h2 className="text-3xl font-bold text-center mb-12">Partners</h2>
-      
       {items.length > 0 ? (
         <div className="flex flex-wrap justify-center gap-8">
           {items.map((item, index) => (
             <div key={item.id ?? index} className="p-4">
               {item.logo && (
-             <Image
-             src={item.logo}
-             alt={item.name}
-             width={150}
-             height={100}
-             className="object-contain"
-             unoptimized
-           />
-           
+                <Image
+                  src={item.logo}
+                  alt={item.name}
+                  width={150}
+                  height={100}
+                  className="object-contain"
+                  unoptimized
+                />
               )}
               <p className="text-center mt-2">{item.name}</p>
             </div>
@@ -329,23 +344,21 @@ const FeaturedStartupsSection: React.FC<{ items: FeaturedStartupData[] }> = ({ i
       <h2 className="text-3xl font-bold text-center mb-12">Featured Startups</h2>
       {items.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {items
-            .sort((a, b) => a.order - b.order)
-            .map((item, index) => (
-              <div key={item.id ?? index} className="bg-white p-6 rounded-lg shadow">
+          {items.map((item, index) => (
+            <div key={item.id ?? index} className="bg-white p-6 rounded-lg shadow">
+              <p>
+                <strong>Startup ID:</strong> {item.startupId}
+              </p>
+              {item.startup && (
                 <p>
-                  <strong>Startup ID:</strong> {item.startupId}
+                  <strong>Name:</strong> {item.startup.name}
                 </p>
-                {item.startup && (
-                  <p>
-                    <strong>Name:</strong> {item.startup.name}
-                  </p>
-                )}
-                <p>
-                  <strong>Order:</strong> {item.order}
-                </p>
-              </div>
-            ))}
+              )}
+              <p>
+                <strong>Order:</strong> {item.order}
+              </p>
+            </div>
+          ))}
         </div>
       ) : (
         <p className="text-center">No Featured Startups data available.</p>
@@ -382,24 +395,22 @@ const ProgramsSection: React.FC<{ items: ProgramData[] }> = ({ items }) => (
       <h2 className="text-3xl font-bold text-center mb-12">Programs</h2>
       {items.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {items
-            .sort((a, b) => a.order - b.order)
-            .map((item, index) => (
-              <div key={item.id ?? index} className="bg-white p-6 rounded-lg shadow">
-                {item.landingImage && (
-                  <Image
-                    src={item.landingImage}
-                    alt={item.title}
-                    width={300}
-                    height={200}
-                    className="object-cover mb-4"
-                    unoptimized
-                  />
-                )}
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p>{item.description}</p>
-              </div>
-            ))}
+          {items.map((item, index) => (
+            <div key={item.id ?? index} className="bg-white p-6 rounded-lg shadow">
+              {item.landingImage && (
+                <Image
+                  src={item.landingImage}
+                  alt={item.title}
+                  width={300}
+                  height={200}
+                  className="object-cover mb-4"
+                  unoptimized
+                />
+              )}
+              <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+              <p>{item.description}</p>
+            </div>
+          ))}
         </div>
       ) : (
         <p className="text-center">No Programs data available.</p>
@@ -414,23 +425,21 @@ const NewsSection: React.FC<{ items: NewsData[] }> = ({ items }) => (
       <h2 className="text-3xl font-bold text-center mb-12">News</h2>
       {items.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {items
-            .sort((a, b) => a.order - b.order)
-            .map((item, index) => (
-              <div key={item.id ?? index} className="bg-gray-100 p-6 rounded-lg shadow">
-                {item.landingImage && (
-                  <Image
-                    src={item.landingImage}
-                    alt={item.title}
-                    width={300}
-                    height={200}
-                    className="object-cover mb-4"
-                  />
-                )}
-                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
-                <p>{item.description}</p>
-              </div>
-            ))}
+          {items.map((item, index) => (
+            <div key={item.id ?? index} className="bg-gray-100 p-6 rounded-lg shadow">
+              {item.landingImage && (
+                <Image
+                  src={item.landingImage}
+                  alt={item.title}
+                  width={300}
+                  height={200}
+                  className="object-cover mb-4"
+                />
+              )}
+              <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+              <p>{item.description}</p>
+            </div>
+          ))}
         </div>
       ) : (
         <p className="text-center">No News data available.</p>
@@ -456,9 +465,7 @@ const VisionAndMissionSection: React.FC<{ items: VisionAndMissionData[] }> = ({ 
               </div>
             ))}
         </div>
-      ) : (
-        <p className="text-center">No Vision & Mission data available.</p>
-      )}
+      ) : null}
     </div>
   </section>
 );
