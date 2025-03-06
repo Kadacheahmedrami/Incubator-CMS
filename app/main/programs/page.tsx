@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit, Trash2, Upload } from 'lucide-react'
 
 type Program = {
   id: number
@@ -18,6 +18,8 @@ export default function ProgramsPage() {
     landingImage: '',
     description: ''
   })
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     fetchPrograms()
@@ -67,6 +69,32 @@ export default function ProgramsPage() {
     setFormData({ title: '', landingImage: '', description: '' })
   }
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      const reader = new FileReader()
+      reader.onloadend = async () => {
+        const base64String = reader.result as string
+        const response = await fetch('/api/main/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: base64String,
+            type: 'programs'
+          }),
+        })
+        const data = await response.json()
+        if (data.url) {
+          setFormData(prev => ({ ...prev, landingImage: data.url }))
+        }
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Manage Programs</h1>
@@ -91,6 +119,11 @@ export default function ProgramsPage() {
           className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        />
+        <input
+          type="file"
+          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          onChange={handleFileChange}
         />
         <div className="flex space-x-2">
           <button

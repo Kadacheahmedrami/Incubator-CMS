@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit, Trash2, Upload } from 'lucide-react'
 
 type News = {
   id: number
@@ -18,6 +18,8 @@ export default function NewsPage() {
     landingImage: '',
     description: ''
   })
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     fetchNews()
@@ -34,14 +36,17 @@ export default function NewsPage() {
     const url = isEditing ? `/api/main/News/${currentNews?.id}` : '/api/main/News'
     const method = isEditing ? 'PUT' : 'POST'
 
-    await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    })
+    const imageUrl = formData.landingImage
+    if (imageUrl) {
+      await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, landingImage: imageUrl })
+      })
 
-    fetchNews()
-    resetForm()
+      fetchNews()
+      resetForm()
+    }
   }
 
   const handleDelete = async (id: number) => {
@@ -65,6 +70,33 @@ export default function NewsPage() {
     setIsEditing(false)
     setCurrentNews(null)
     setFormData({ title: '', landingImage: '', description: '' })
+    setSelectedFile(null)
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      const reader = new FileReader()
+      reader.onloadend = async () => {
+        const base64String = reader.result as string
+        const response = await fetch('/api/main/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: base64String,
+            type: 'news'
+          }),
+        })
+        const data = await response.json()
+        if (data.url) {
+          setFormData(prev => ({ ...prev, landingImage: data.url }))
+        }
+      }
+      reader.readAsDataURL(file)
+    }
   }
 
   return (
@@ -86,6 +118,11 @@ export default function NewsPage() {
           value={formData.landingImage}
           onChange={(e) => setFormData({ ...formData, landingImage: e.target.value })}
         />
+        <input
+          type="file"
+          className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          onChange={handleFileChange}
+        />
         <textarea
           placeholder="Description"
           className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
@@ -96,6 +133,7 @@ export default function NewsPage() {
           <button
             type="submit"
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            disabled={uploading}
           >
             {isEditing ? 'Update News' : 'Add News'}
           </button>
