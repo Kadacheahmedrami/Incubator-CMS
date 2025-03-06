@@ -1,15 +1,28 @@
 "use client";
+
 import FeaturedHistoryAndValuesSelector from '@/components/EditableLandingPage/FeturedHistoryAndValues';
-// By default, the CldImage component applies auto-format and auto-quality to all delivery URLs for optimized delivery.
+import FeaturedEventsSelector from '@/components/EditableLandingPage/FeaturedEvents';
+import FeaturedNewsSelector from '@/components/EditableLandingPage/FeaturedNews';
+import FeaturedProgramsSelector from '@/components/EditableLandingPage/FeaturedPrograms';
+
 export default function Page() {
   return (
-    <>  
-
-
-
-
-<FeaturedHistoryAndValuesSelector></FeaturedHistoryAndValuesSelector>          
+    <>
+        <div className="space-y-12 py-8">
+      <div>
+        <FeaturedHistoryAndValuesSelector />
+      </div>
+      <div>
+        <FeaturedEventsSelector />
+      </div>
+      <div>
+        <FeaturedNewsSelector />
+      </div>
+      <div>
+        <FeaturedProgramsSelector />
+      </div>
+    </div>
     </>
- 
+
   );
 }
